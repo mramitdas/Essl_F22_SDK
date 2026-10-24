@@ -34,11 +34,13 @@ the first three sections are rewritten.
 
 - `prod` — default/protected branch. **Can be merged only from `stag`.**
 - `stag` — staging. **Can be merged only from `dev`.**
-- `dev` — integration branch. **Can be merged from any other branch.**
-- Feature/issue branches (`<type>/<issue#>-<slug>`) target `dev`. Promotion
-  through the chain happens via PRs only, one hop at a time.
-- This checkout has no remote; the local branches mirror this layout and no
-  push or PR is performed until a remote is configured.
+- `dev` — integration branch. **Can be merged only from feature/issue
+  branches** (`<type>/<issue#>-<slug>`).
+- Feature/issue branches target `dev`. Promotion through the chain happens
+  via PRs only, one hop at a time.
+- Remote `origin` is `https://github.com/mramitdas/essl-f22-sdk`; all
+  changes land through PRs and no direct pushes to integration branches are
+  permitted.
 
 ---
 

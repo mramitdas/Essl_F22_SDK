@@ -1,8 +1,8 @@
 # essl_f22
 
-**A short description of the project.**
+**Synchronous Python SDK for eSSL/ZKTeco F22 terminals.**
 
-[![CI](https://github.com/mramitdas/essl_f22/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/essl_f22/actions/workflows/ci.yml)
+[![CI](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml)
 
 ## Quickstart
 
