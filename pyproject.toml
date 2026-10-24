@@ -5,17 +5,15 @@ build-backend = "hatchling.build"
 [project]
 name = "essl_f22"
 version = "0.1.0"
-description = "A short description of the project."
+description = "Synchronous Python SDK for eSSL/ZKTeco F22 terminals."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
     { name = "amit das", email = "mramitdas99@gmail.com" },
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -23,10 +21,16 @@ classifiers = [
 
 [project.optional-dependencies]
 docs = ["mkdocs-material"]
+mongo = ["pymongo>=4.10"]
+mysql = ["pymysql>=1.1"]
+postgres = ["psycopg[binary]>=3.2"]
+redis = ["redis>=5.2"]
 
 
 [project.urls]
-Homepage = "https://github.com/mramitdas/essl_f22"
+Homepage = "https://github.com/mramitdas/essl-f22-sdk"
+Repository = "https://github.com/mramitdas/essl-f22-sdk"
+Issues = "https://github.com/mramitdas/essl-f22-sdk/issues"
 
 [dependency-groups]
 dev = [
@@ -38,7 +42,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 line-length = 88
 src = ["src"]
 
@@ -49,6 +53,20 @@ select = ["E", "F", "I", "UP", "B"]
 strict = true
 mypy_path = "src"
 
+[[tool.mypy.overrides]]
+module = [
+    "psycopg",
+    "psycopg.*",
+    "pymysql",
+    "pymysql.*",
+    "pymongo",
+    "pymongo.*",
+    "redis",
+    "redis.*",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--cov=essl_f22", "--cov-report=term-missing"]
+markers = ["hardware: requires a real eSSL/ZKTeco device"]
