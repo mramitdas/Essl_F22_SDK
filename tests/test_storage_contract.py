@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +24,7 @@ from essl_f22.storage import (
     SqliteStorage,
     StorageBackend,
     SyncState,
+    create_storage,
 )
 from essl_f22.storage.codec import attendance_record_key
 
@@ -30,15 +32,29 @@ DEVICE = "JJA1242200334"
 OTHER_DEVICE = "OTHER123"
 
 
-@pytest.fixture(params=["memory", "json", "sqlite"])
+@pytest.fixture(params=["memory", "json", "sqlite", "postgres", "mysql"])
 def storage(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[StorageBackend]:
     if request.param == "memory":
         store: StorageBackend = MemoryStorage()
     elif request.param == "json":
         store = JsonFileStorage(tmp_path / "mirror.json")
-    else:
+    elif request.param == "sqlite":
         store = SqliteStorage(tmp_path / "state.db")
+    elif request.param == "postgres":
+        dsn = os.environ.get("ESSL_F22_POSTGRES_DSN")
+        if not dsn:
+            pytest.skip("ESSL_F22_POSTGRES_DSN is not set")
+        store = create_storage("postgres", options={"dsn": dsn})
+    else:
+        dsn = os.environ.get("ESSL_F22_MYSQL_DSN")
+        if not dsn:
+            pytest.skip("ESSL_F22_MYSQL_DSN is not set")
+        store = create_storage("mysql", options={"dsn": dsn})
+    store.clear_device(DEVICE)
+    store.clear_device(OTHER_DEVICE)
     yield store
+    store.clear_device(DEVICE)
+    store.clear_device(OTHER_DEVICE)
     store.close()
 
 

@@ -12,11 +12,13 @@ from essl_f22.storage.models import (
     SyncResult,
     SyncState,
 )
+from essl_f22.storage.mysql import MysqlStorage
 from essl_f22.storage.paths import (
     default_data_dir,
     default_mirror_path,
     default_state_path,
 )
+from essl_f22.storage.postgres import PostgresStorage
 from essl_f22.storage.sqlite import SqliteStorage
 
 __all__ = [
@@ -27,6 +29,8 @@ __all__ = [
     "JsonFileStorage",
     "MemoryStorage",
     "MirrorStore",
+    "MysqlStorage",
+    "PostgresStorage",
     "SqliteStorage",
     "StorageBackend",
     "SyncMode",
