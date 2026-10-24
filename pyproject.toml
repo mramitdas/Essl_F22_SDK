@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "essl_f22"
 version = "0.1.0"
-description = "A short description of the project."
+description = "Synchronous Python SDK for eSSL/ZKTeco F22 terminals."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
@@ -24,7 +24,9 @@ docs = ["mkdocs-material"]
 
 
 [project.urls]
-Homepage = "https://github.com/mramitdas/essl_f22"
+Homepage = "https://github.com/mramitdas/essl-f22-sdk"
+Repository = "https://github.com/mramitdas/essl-f22-sdk"
+Issues = "https://github.com/mramitdas/essl-f22-sdk/issues"
 
 [dependency-groups]
 dev = [
