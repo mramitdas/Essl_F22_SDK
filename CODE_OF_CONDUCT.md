@@ -2,7 +2,7 @@
 
 ## Our pledge
 
-We as members, contributors, and maintainers of essl_f22
+We as members, contributors, and maintainers of the Essl F22 SDK
 pledge to make participation in this project a harassment-free experience for
 everyone, regardless of age, body size, visible or invisible disability, ethnicity,
 sex characteristics, gender identity and expression, level of experience,

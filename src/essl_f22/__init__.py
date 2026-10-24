@@ -1,4 +1,4 @@
-"""eSSL F22 SDK public API."""
+"""Essl F22 SDK public API."""
 
 from essl_f22.access import AccessDevice, BlockManager, BlockResult, UnblockResult
 from essl_f22.device import Device

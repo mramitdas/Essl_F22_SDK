@@ -1,4 +1,4 @@
-"""Exceptions raised by the eSSL F22 SDK."""
+"""Exceptions raised by the Essl F22 SDK."""
 
 
 class ESSL22Error(Exception):
