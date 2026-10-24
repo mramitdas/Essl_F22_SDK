@@ -11,22 +11,49 @@ MySQL, MongoDB, or Redis.
 
 ## Install
 
+This is a Python library, not a command-line application.
+
 ```bash
-uv sync
+pip install essl_f22
+```
+
+Or with uv:
+
+```bash
+uv add essl_f22
 ```
 
 Optional storage drivers and documentation tooling are extras:
 
 ```bash
-uv sync --extra postgres
-uv sync --extra mysql
-uv sync --extra mongo
-uv sync --extra redis
-uv sync --extra docs
+pip install "essl_f22[postgres]"
+pip install "essl_f22[mysql]"
+pip install "essl_f22[mongo]"
+pip install "essl_f22[redis]"
+pip install "essl_f22[docs]"
+```
+
+The same extras work with uv:
+
+```bash
+uv add "essl_f22[postgres]"
+```
+
+`pipx` and `uvx` are application runners. They do not make a library
+importable in another project. For a one-off run with `uvx`:
+
+```bash
+uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
 ```
 
 Optional drivers are imported lazily. The core package imports and the default
 test suite work without installing any of them.
+
+## Development
+
+```bash
+uv sync
+```
 
 ## Quickstart
 
