@@ -33,3 +33,23 @@ jobs:
         run: uv run mypy src/
       - name: pytest
         run: uv run pytest
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.14
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Check package metadata
+        run: uvx twine check dist/*
+      - name: Install wheel in clean environment
+        run: |
+          uv venv --python 3.14 /tmp/essl_f22-wheel
+          uv pip install --python /tmp/essl_f22-wheel/bin/python dist/*.whl
+          /tmp/essl_f22-wheel/bin/python -c "from importlib.metadata import version; import essl_f22; from essl_f22 import Device; assert essl_f22.__version__ == version('essl_f22'); print(Device, essl_f22.__version__)"
