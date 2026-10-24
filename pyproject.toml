@@ -21,8 +21,10 @@ classifiers = [
 
 [project.optional-dependencies]
 docs = ["mkdocs-material"]
+mongo = ["pymongo>=4.10"]
 mysql = ["pymysql>=1.1"]
 postgres = ["psycopg[binary]>=3.2"]
+redis = ["redis>=5.2"]
 
 
 [project.urls]
@@ -52,7 +54,16 @@ strict = true
 mypy_path = "src"
 
 [[tool.mypy.overrides]]
-module = ["psycopg", "psycopg.*", "pymysql", "pymysql.*"]
+module = [
+    "psycopg",
+    "psycopg.*",
+    "pymysql",
+    "pymysql.*",
+    "pymongo",
+    "pymongo.*",
+    "redis",
+    "redis.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
