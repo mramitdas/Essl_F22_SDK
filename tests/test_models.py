@@ -2,7 +2,11 @@ import pytest
 
 from essl_f22.errors import ProtocolError
 from essl_f22.models import (
+    DayInterval,
+    GroupInfo,
+    TimeZone,
     User,
+    UserTimeZone,
     parse_attendance_records,
     parse_fingerprint_templates,
     parse_user_records,
@@ -106,3 +110,59 @@ def test_parse_fingerprint_rejects_truncated_template() -> None:
     blob = (len(entry)).to_bytes(4, "little") + entry
     with pytest.raises(ProtocolError):
         parse_fingerprint_templates(blob)
+
+
+def test_timezone_parses_default_allow_all() -> None:
+    data = bytes.fromhex(
+        "01000000173b0000173b0000173b0000173b0000173b0000173b0000173b0000"
+    )
+    tz = TimeZone.from_response(data)
+    assert tz.slot == 1
+    assert len(tz.days) == 7
+    assert tz.is_default_allow_all()
+    assert not tz.is_deny_all()
+
+
+def test_timezone_encodes_deny_all_request() -> None:
+    tz = TimeZone(
+        slot=6,
+        days=(DayInterval(23, 59, 0, 0),) * 7,
+    )
+    assert tz.is_deny_all()
+    assert tz.to_request().hex() == "06000000" + "173b0000" * 7
+
+
+def test_timezone_rejects_truncated_response() -> None:
+    with pytest.raises(ProtocolError):
+        TimeZone.from_response(b"\x01" * 31)
+
+
+def test_group_info_parses_and_encodes() -> None:
+    group = GroupInfo.from_response(bytes.fromhex("0101000000000000"))
+    assert group.group_id == 1
+    assert (group.tz1, group.tz2, group.tz3) == (1, 0, 0)
+    assert group.verify_style == 0
+    assert group.holiday_enabled is False
+    assert group.to_request() == bytes.fromhex("0101000000000000")
+
+
+def test_user_timezone_parses_personal_and_canonicalizes_group() -> None:
+    tz = UserTimeZone.from_response(295, bytes.fromhex("0100060000000000"))
+    assert tz.use_personal is True
+    assert (tz.tz1, tz.tz2, tz.tz3) == (6, 0, 0)
+    assert tz.to_request() == bytes.fromhex("2701000001000000060000000000000000000000")
+
+    group_tz = UserTimeZone.from_response(295, b"\x00" * 8)
+    assert group_tz.canonical() == UserTimeZone(295, False, 0, 0, 0)
+
+
+def test_group_info_rejects_invalid_length() -> None:
+    for size in (7, 9):
+        with pytest.raises(ProtocolError):
+            GroupInfo.from_response(b"\x00" * size)
+
+
+def test_user_timezone_rejects_invalid_length() -> None:
+    for size in (7, 9):
+        with pytest.raises(ProtocolError):
+            UserTimeZone.from_response(295, b"\x00" * size)

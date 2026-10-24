@@ -212,3 +212,131 @@ def parse_fingerprint_templates(blob: bytes) -> list[FingerprintTemplate]:
         )
         offset = end
     return templates
+
+
+@dataclass(frozen=True, slots=True)
+class DayInterval:
+    start_hour: int
+    start_minute: int
+    end_hour: int
+    end_minute: int
+
+    def allows(self, value: datetime) -> bool:
+        if (self.start_hour, self.start_minute) >= (self.end_hour, self.end_minute):
+            return False
+        current = value.hour * 60 + value.minute
+        start = self.start_hour * 60 + self.start_minute
+        end = self.end_hour * 60 + self.end_minute
+        return start <= current <= end
+
+
+@dataclass(frozen=True, slots=True)
+class TimeZone:
+    slot: int
+    days: tuple[DayInterval, ...]
+
+    @classmethod
+    def from_response(cls, data: bytes) -> TimeZone:
+        if len(data) != 32:
+            raise ProtocolError(f"timezone response must be 32 bytes, got {len(data)}")
+        slot = struct.unpack_from("<H", data, 0)[0]
+        days = tuple(
+            DayInterval(*struct.unpack_from("<BBBB", data, 2 + index * 4))
+            for index in range(7)
+        )
+        return cls(slot=slot, days=days)
+
+    def to_request(self) -> bytes:
+        intervals = b"".join(
+            struct.pack(
+                "<BBBB",
+                day.start_hour,
+                day.start_minute,
+                day.end_hour,
+                day.end_minute,
+            )
+            for day in self.days
+        )
+        return struct.pack("<I", self.slot) + intervals
+
+    def is_default_allow_all(self) -> bool:
+        return all(
+            (day.start_hour, day.start_minute, day.end_hour, day.end_minute)
+            == (0, 0, 23, 59)
+            for day in self.days
+        )
+
+    def is_deny_all(self) -> bool:
+        return all(
+            (day.start_hour, day.start_minute) >= (day.end_hour, day.end_minute)
+            for day in self.days
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class GroupInfo:
+    group_id: int
+    tz1: int
+    tz2: int
+    tz3: int
+    verify_style: int
+    holiday_enabled: bool
+
+    @classmethod
+    def from_response(cls, data: bytes) -> GroupInfo:
+        if len(data) != 8:
+            raise ProtocolError(f"group response must be 8 bytes, got {len(data)}")
+        group_id, tz1, tz2, tz3, flags = struct.unpack("<BHHHB", data)
+        return cls(
+            group_id=group_id,
+            tz1=tz1,
+            tz2=tz2,
+            tz3=tz3,
+            verify_style=flags & 0x7F,
+            holiday_enabled=bool(flags & 0x80),
+        )
+
+    def to_request(self) -> bytes:
+        flags = self.verify_style & 0x7F
+        if self.holiday_enabled:
+            flags |= 0x80
+        return struct.pack("<BHHHB", self.group_id, self.tz1, self.tz2, self.tz3, flags)
+
+
+@dataclass(frozen=True, slots=True)
+class UserTimeZone:
+    uid: int
+    use_personal: bool
+    tz1: int = 0
+    tz2: int = 0
+    tz3: int = 0
+
+    @classmethod
+    def from_response(cls, uid: int, data: bytes) -> UserTimeZone:
+        if len(data) != 8:
+            raise ProtocolError(
+                f"user-timezone response must be 8 bytes, got {len(data)}"
+            )
+        flag, tz1, tz2, tz3 = struct.unpack("<HHHH", data)
+        return cls(
+            uid=uid,
+            use_personal=flag == 1,
+            tz1=tz1,
+            tz2=tz2,
+            tz3=tz3,
+        )
+
+    def to_request(self) -> bytes:
+        return struct.pack(
+            "<IIIII",
+            self.uid,
+            1 if self.use_personal else 0,
+            self.tz1,
+            self.tz2,
+            self.tz3,
+        )
+
+    def canonical(self) -> UserTimeZone:
+        if self.use_personal:
+            return self
+        return UserTimeZone(uid=self.uid, use_personal=False)
