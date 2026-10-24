@@ -24,6 +24,7 @@ from essl_f22.protocol import (
     decode_device_time,
     encode_device_time,
 )
+from essl_f22.storage import MemoryStorage
 from tests.fakes import FakeSession
 from tests.test_models import RECORD_HEX
 
@@ -303,3 +304,13 @@ def test_list_groups_honors_max_groups() -> None:
     assert session.calls == [
         (CMD_GRPTZ_RRQ, bytes([group_id]) + b"\x00" * 7) for group_id in (1, 2)
     ]
+
+
+def test_device_uses_injected_storage_for_block_state() -> None:
+    storage = MemoryStorage()
+    session = FakeSession(
+        {CMD_OPTIONS_RRQ: Response(2000, b"~SerialNumber=JJA1242200334\x00", 0, 0)}
+    )
+    device = Device("127.0.0.1", session=session, storage=storage)
+
+    assert device.get_blocked_users() == []
