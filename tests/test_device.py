@@ -5,14 +5,21 @@ import pytest
 
 from essl_f22.device import Device
 from essl_f22.errors import ProtocolError, UserNotFoundError
+from essl_f22.models import DayInterval, GroupInfo, TimeZone, UserTimeZone
 from essl_f22.protocol import (
     CMD_ATTLOG_RRQ,
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
+    CMD_GRPTZ_RRQ,
+    CMD_GRPTZ_WRQ,
     CMD_OPTIONS_RRQ,
     CMD_SET_TIME,
+    CMD_TZ_RRQ,
+    CMD_TZ_WRQ,
     CMD_USERTEMP_RRQ,
+    CMD_USERTZ_RRQ,
+    CMD_USERTZ_WRQ,
     Response,
     decode_device_time,
     encode_device_time,
@@ -212,3 +219,87 @@ def test_list_attendance_skips_read_when_count_is_zero() -> None:
     device = Device("127.0.0.1", session=session)
     assert device.list_attendance() == []
     assert session.calls == [(CMD_GET_FREE_SIZES, b"")]
+
+
+TIMEZONE_DATA = bytes.fromhex(
+    "01000000173b0000173b0000173b0000173b0000173b0000173b0000173b0000"
+)
+GROUP_DATA = bytes.fromhex("0101000000000000")
+USER_TIMEZONE_DATA = bytes.fromhex("0100060000000000")
+
+
+def test_get_timezone_parses_default_allow_all() -> None:
+    session = FakeSession({CMD_TZ_RRQ: Response(2000, TIMEZONE_DATA, 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    timezone = device.get_timezone(1)
+    assert timezone.is_default_allow_all()
+    assert session.calls == [(CMD_TZ_RRQ, struct.pack("<I", 1))]
+
+
+def test_get_group_parses_payload() -> None:
+    session = FakeSession({CMD_GRPTZ_RRQ: Response(2000, GROUP_DATA, 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    group = device.get_group(1)
+    assert group.group_id == 1
+    assert group.tz1 == 1
+    assert session.calls == [(CMD_GRPTZ_RRQ, b"\x01" + b"\x00" * 7)]
+
+
+def test_get_user_timezone_parses_personal_payload() -> None:
+    session = FakeSession({CMD_USERTZ_RRQ: Response(2000, USER_TIMEZONE_DATA, 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    timezone = device.get_user_timezone(295)
+    assert timezone == UserTimeZone(295, True, 6, 0, 0)
+    assert session.calls == [(CMD_USERTZ_RRQ, struct.pack("<I", 295))]
+
+
+def test_set_timezone_sends_request_and_refreshes() -> None:
+    timezone = TimeZone(slot=6, days=(DayInterval(23, 59, 0, 0),) * 7)
+    session = FakeSession({CMD_TZ_WRQ: Response(2000, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    device.set_timezone(timezone)
+    assert session.calls == [(CMD_TZ_WRQ, timezone.to_request()), (1013, b"")]
+
+
+def test_set_group_sends_request_and_refreshes() -> None:
+    group = GroupInfo(1, 1, 0, 0, 0, False)
+    session = FakeSession({CMD_GRPTZ_WRQ: Response(2000, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    device.set_group(group)
+    assert session.calls == [(CMD_GRPTZ_WRQ, group.to_request()), (1013, b"")]
+
+
+def test_set_user_timezone_sends_canonical_request_and_refreshes() -> None:
+    timezone = UserTimeZone(295, False, 6, 0, 0)
+    session = FakeSession({CMD_USERTZ_WRQ: Response(2000, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    device.set_user_timezone(295, timezone)
+    expected = UserTimeZone(295, False).to_request()
+    assert session.calls == [(CMD_USERTZ_WRQ, expected), (1013, b"")]
+
+
+def test_list_timezones_honors_max_slots() -> None:
+    session = FakeSession({CMD_TZ_RRQ: Response(2000, TIMEZONE_DATA, 0, 0)})
+    device = Device("127.0.0.1", session=session, max_timezone_slots=3)
+    timezones = device.list_timezones()
+    assert len(timezones) == 1
+    assert session.calls == [
+        (CMD_TZ_RRQ, struct.pack("<I", slot)) for slot in (1, 2, 3)
+    ]
+
+
+def test_list_timezones_skips_unavailable_slots() -> None:
+    session = FakeSession({CMD_TZ_RRQ: Response(0x1381, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session, max_timezone_slots=2)
+    assert device.list_timezones() == {}
+    assert len(session.calls) == 2
+
+
+def test_list_groups_honors_max_groups() -> None:
+    session = FakeSession({CMD_GRPTZ_RRQ: Response(2000, GROUP_DATA, 0, 0)})
+    device = Device("127.0.0.1", session=session, max_groups=2)
+    groups = device.list_groups()
+    assert len(groups) == 1
+    assert session.calls == [
+        (CMD_GRPTZ_RRQ, bytes([group_id]) + b"\x00" * 7) for group_id in (1, 2)
+    ]

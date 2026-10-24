@@ -12,7 +12,10 @@ from essl_f22.models import (
     DeviceInfo,
     FingerprintTemplate,
     FreeSizes,
+    GroupInfo,
+    TimeZone,
     User,
+    UserTimeZone,
     parse_attendance_records,
     parse_fingerprint_templates,
     parse_user_records,
@@ -23,9 +26,15 @@ from essl_f22.protocol import (
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
+    CMD_GRPTZ_RRQ,
+    CMD_GRPTZ_WRQ,
     CMD_OPTIONS_RRQ,
     CMD_SET_TIME,
+    CMD_TZ_RRQ,
+    CMD_TZ_WRQ,
     CMD_USERTEMP_RRQ,
+    CMD_USERTZ_RRQ,
+    CMD_USERTZ_WRQ,
     Response,
     decode_device_time,
     encode_device_time,
@@ -47,8 +56,12 @@ class Device:
         encoding: str = "utf-8",
         transport: Transport | None = None,
         session: SessionLike | None = None,
+        max_timezone_slots: int = 50,
+        max_groups: int = 100,
     ) -> None:
         self._encoding = encoding
+        self._max_timezone_slots = max_timezone_slots
+        self._max_groups = max_groups
         self._session: SessionLike = (
             session
             if session is not None
@@ -140,6 +153,63 @@ class Device:
         if not blob:
             return []
         return parse_attendance_records(blob, sizes.attendance)
+
+    def get_timezone(self, slot: int) -> TimeZone:
+        response = self._session.send_command(CMD_TZ_RRQ, struct.pack("<I", slot))
+        self._require_ack(response, f"timezone {slot}")
+        return TimeZone.from_response(response.data)
+
+    def list_timezones(self) -> dict[int, TimeZone]:
+        timezones: dict[int, TimeZone] = {}
+        for slot in range(1, self._max_timezone_slots + 1):
+            try:
+                timezone = self.get_timezone(slot)
+            except CommandError as exc:
+                if exc.code == 0x1381:
+                    continue
+                raise
+            timezones[timezone.slot] = timezone
+        return timezones
+
+    def set_timezone(self, timezone: TimeZone) -> None:
+        response = self._session.send_command(CMD_TZ_WRQ, timezone.to_request())
+        self._require_ack(response, "set timezone")
+        self.refresh_data()
+
+    def get_group(self, group_id: int) -> GroupInfo:
+        request = bytes([group_id]) + b"\x00" * 7
+        response = self._session.send_command(CMD_GRPTZ_RRQ, request)
+        self._require_ack(response, f"group {group_id}")
+        return GroupInfo.from_response(response.data)
+
+    def list_groups(self) -> list[GroupInfo]:
+        groups: dict[int, GroupInfo] = {}
+        for group_id in range(1, self._max_groups + 1):
+            try:
+                group = self.get_group(group_id)
+            except CommandError as exc:
+                if exc.code == 0x1381:
+                    continue
+                raise
+            groups[group.group_id] = group
+        return list(groups.values())
+
+    def set_group(self, group: GroupInfo) -> None:
+        response = self._session.send_command(CMD_GRPTZ_WRQ, group.to_request())
+        self._require_ack(response, "set group")
+        self.refresh_data()
+
+    def get_user_timezone(self, uid: int) -> UserTimeZone:
+        response = self._session.send_command(CMD_USERTZ_RRQ, struct.pack("<I", uid))
+        self._require_ack(response, f"user timezone {uid}")
+        return UserTimeZone.from_response(uid, response.data)
+
+    def set_user_timezone(self, uid: int, timezone: UserTimeZone) -> None:
+        response = self._session.send_command(
+            CMD_USERTZ_WRQ, timezone.canonical().to_request()
+        )
+        self._require_ack(response, f"set user timezone {uid}")
+        self.refresh_data()
 
     def get_free_sizes(self) -> FreeSizes:
         response = self._session.send_command(CMD_GET_FREE_SIZES)
