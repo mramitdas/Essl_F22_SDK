@@ -340,3 +340,21 @@ class UserTimeZone:
         if self.use_personal:
             return self
         return UserTimeZone(uid=self.uid, use_personal=False)
+
+
+@dataclass(frozen=True, slots=True)
+class DeviceInfo:
+    platform: str
+    device_name: str
+    serial_number: str
+    firmware_version: str
+
+
+@dataclass(frozen=True, slots=True)
+class FreeSizes:
+    users: int
+    fingerprints: int
+    attendance: int
+    users_capacity: int
+    fingerprints_capacity: int
+    attendance_capacity: int

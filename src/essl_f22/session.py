@@ -237,6 +237,10 @@ class Session:
 class SessionLike(Protocol):
     """The session operations consumed by higher-level device APIs."""
 
+    def connect(self) -> None: ...
+
+    def close(self) -> None: ...
+
     def send_command(
         self, command: int, data: bytes = b"", response_size: int = 8
     ) -> Response: ...

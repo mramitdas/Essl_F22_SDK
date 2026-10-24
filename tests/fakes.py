@@ -1,5 +1,6 @@
 from collections import deque
 
+from essl_f22.protocol import Response
 from essl_f22.transport import Transport
 
 
@@ -19,3 +20,26 @@ class FakeTransport(Transport):
 
     def close(self) -> None:
         self.closed = True
+
+
+class FakeSession:
+    def __init__(self, responses: dict[int, Response]) -> None:
+        self.responses = responses
+        self.calls: list[tuple[int, bytes]] = []
+
+    def connect(self) -> None: ...
+
+    def close(self) -> None: ...
+
+    def send_command(
+        self, command: int, data: bytes = b"", response_size: int = 8
+    ) -> Response:
+        self.calls.append((command, data))
+        return self.responses[command]
+
+    def read_buffer(self, command: int, fct: int = 0, ext: int = 0) -> bytes:
+        self.calls.append((command, bytes([fct, ext])))
+        return self.responses[command].data
+
+    def refresh_data(self) -> None:
+        self.calls.append((1013, b""))

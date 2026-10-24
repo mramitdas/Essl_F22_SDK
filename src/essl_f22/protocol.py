@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import struct
 from dataclasses import dataclass
+from datetime import datetime
 
 from essl_f22.errors import ProtocolError
 
@@ -146,3 +147,31 @@ def make_comm_key(key: int, session_id: int, ticks: int = 50) -> bytes:
         swapped[3] ^ tick_byte,
     )
     return struct.pack("BBBB", *final)
+
+
+def encode_device_time(value: datetime) -> int:
+    """Encode a datetime using the device's compact timestamp formula."""
+
+    total = value.year - 2000
+    total = total * 12 + (value.month - 1)
+    total = total * 31 + (value.day - 1)
+    total = total * 24 + value.hour
+    total = total * 60 + value.minute
+    return total * 60 + value.second
+
+
+def decode_device_time(value: int) -> datetime:
+    """Decode the device's compact timestamp formula."""
+
+    second = value % 60
+    value //= 60
+    minute = value % 60
+    value //= 60
+    hour = value % 24
+    value //= 24
+    day = value % 31 + 1
+    value //= 31
+    month = value % 12 + 1
+    value //= 12
+    year = value + 2000
+    return datetime(year, month, day, hour, minute, second)
