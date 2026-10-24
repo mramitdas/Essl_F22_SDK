@@ -12,22 +12,23 @@ the first three sections are rewritten.
 
 <!-- PROJECT SPECIFIC — regenerate when reusing this file in another project -->
 
-- **Language/Runtime:** Python 3.12+ target; current `pyproject.toml` pins
-  `>=3.14` until the SDK plan updates it.
+- **Language/Runtime:** Python 3.12+; `pyproject.toml` requires `>=3.12`.
 - **Web framework:** None. This repository is a library, not a web service.
-- **Database:** SQLite via stdlib `sqlite3` for local block-state persistence
-  (planned; not implemented yet).
+- **Database:** SQLite via stdlib `sqlite3` by default, with JSON and in-memory
+  backends for block state and the offline mirror. PostgreSQL, MySQL, MongoDB,
+  and Redis are optional adapters using their direct drivers.
 - **Validation/config:** Dataclasses and explicit constructor arguments; no
   Pydantic dependency.
 - **Telegram:** None.
 - **Outbound HTTP:** None. Device communication is TCP via stdlib `socket`.
 - **Logging:** No logging framework selected yet; avoid adding runtime
   dependencies without an accepted requirement.
-- **Testing:** pytest + pytest-cov. Hardware tests are opt-in and skipped by
-  default.
-- **Quality gates:** ruff (lint + format), mypy (strict), pytest.
-- **Packaging/deploy:** hatchling, uv; mkdocs-material is an optional docs
-  extra.
+- **Testing:** pytest + pytest-cov. External storage tests are opt-in through
+  environment values; hardware tests use the `hardware` marker and are opt-in
+  through `ESSL_F22_HOST`.
+- **Quality gates:** ruff (lint + format), mypy (strict), pytest, pre-commit.
+- **Packaging/deploy:** hatchling, uv; optional extras are `docs`, `mongo`,
+  `mysql`, `postgres`, and `redis`.
 - **License:** Apache 2.0.
 
 ### Branch layout
@@ -41,6 +42,9 @@ the first three sections are rewritten.
 - Remote `origin` is `https://github.com/mramitdas/essl-f22-sdk`; all
   changes land through PRs and no direct pushes to integration branches are
   permitted.
+- Server-side branch protection is unavailable on the private free-plan
+  repository. The branch-flow workflow and PR discipline are the enforcement
+  mechanism.
 
 ---
 
@@ -57,6 +61,8 @@ uv sync
 # Test
 uv run pytest                           # all tests with coverage
 uv run pytest -k name                   # single test
+uv run pytest -m hardware               # opt-in read-only hardware test
+uv run pytest tests/test_storage_contract.py  # opt-in external storage tests
 
 # Quality gates (must be clean before every PR)
 uv run ruff check .
@@ -86,14 +92,16 @@ ask instead of guessing.
 - `session.py` — connect/auth, command request/response, buffered reads.
 - `models.py` — dataclasses for users, attendance, fingerprints, timezones,
   groups, and device info.
-- `device.py` — high-level device read and access APIs.
-- `state.py` — SQLite block-state store.
-- `access.py` — block/unblock manager.
+- `device.py` — high-level device read, blocking, mirror, and sync APIs.
+- `mirror.py` — read-only offline mirror and full/incremental sync.
+- `access.py` — non-destructive block/unblock manager.
+- `storage/` — document storage protocols, codecs, built-in backends,
+  external adapters, and the storage factory.
+- `state.py` — `SqliteBlockStateStore` compatibility shim.
 - `__init__.py` — public exports.
-- `core.py` and `tests/test_core.py` are starter files scheduled for removal
-  by the SDK plan; do not build new behavior on them.
 - Unit tests must not require a physical device; use fake transports/sessions.
-  Hardware tests are separate and skipped unless explicitly enabled.
+  Hardware tests are separate, read-only by default, and skipped unless
+  `ESSL_F22_HOST` is set.
 
 ### Code style
 
