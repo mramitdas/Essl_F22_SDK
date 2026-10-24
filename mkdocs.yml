@@ -1,0 +1,10 @@
+site_name: essl_f22
+site_description: "A short description of the project."
+theme:
+  name: material
+nav:
+  - Home: index.md
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
