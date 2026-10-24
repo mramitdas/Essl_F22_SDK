@@ -41,5 +41,21 @@ class NoFreeTimeZoneSlotError(ESSL22Error):
     """Raised when no timezone slot is available for blocking."""
 
 
-class StateStoreError(ESSL22Error):
+class StorageError(ESSL22Error):
+    """Raised when local storage cannot be read or written."""
+
+
+class StorageConfigurationError(StorageError):
+    """Raised when a storage backend is unknown or misconfigured."""
+
+
+class MirrorRecordNotFoundError(StorageError):
+    """Raised when an offline mirror record does not exist."""
+
+
+class SyncError(StorageError):
+    """Raised when a mirror synchronization cannot be completed."""
+
+
+class StateStoreError(StorageError):
     """Raised when local block state cannot be read or written."""
