@@ -23,7 +23,7 @@ class MongoStorage(DocumentStorage):
         except ImportError as exc:
             raise StorageConfigurationError(
                 "MongoDB storage requires pymongo from the 'mongo' extra: "
-                "install essl_f22[mongo]"
+                "install Essl_F22_SDK[mongo]"
             ) from exc
         self._driver: Any = pymongo
         self._error: Any = pymongo.errors.PyMongoError

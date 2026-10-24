@@ -121,7 +121,7 @@ with an installation hint at backend creation time, not at import time.
 ### PostgreSQL (`postgres` / `postgresql`)
 
 ```bash
-python -m pip install "essl_f22[postgres]"
+python -m pip install "Essl_F22_SDK[postgres]"
 ```
 
 ```python
@@ -141,7 +141,7 @@ Use it when you need durable shared storage and normal database operations.
 ### MySQL (`mysql`)
 
 ```bash
-python -m pip install "essl_f22[mysql]"
+python -m pip install "Essl_F22_SDK[mysql]"
 ```
 
 ```python
@@ -162,7 +162,7 @@ The DSN must include a database name. The backend accepts `mysql://` and
 ### MongoDB (`mongo` / `mongodb`)
 
 ```bash
-python -m pip install "essl_f22[mongo]"
+python -m pip install "Essl_F22_SDK[mongo]"
 ```
 
 ```python
@@ -182,7 +182,7 @@ The URI must include a database. The SDK uses a `documents` collection.
 ### Redis (`redis`)
 
 ```bash
-python -m pip install "essl_f22[redis]"
+python -m pip install "Essl_F22_SDK[redis]"
 ```
 
 ```python

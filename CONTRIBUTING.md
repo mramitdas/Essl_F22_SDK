@@ -30,7 +30,7 @@ GitHub environment.
 2. Merge the release change through `dev` → `stag` → `prod`.
 3. Tag `prod` with `vX.Y.Z` and push the tag.
 4. The `release.yml` workflow builds and publishes the sdist and wheel.
-5. Verify `pip install essl_f22==X.Y.Z` in a clean environment.
+5. Verify `pip install Essl_F22_SDK==X.Y.Z` in a clean environment.
 
 ## Code of Conduct
 

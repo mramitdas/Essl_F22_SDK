@@ -148,7 +148,7 @@ Test-NetConnection -ComputerName DEVICE_IP -Port 4370
 
 ## 12. Version and change management
 
-- [ ] The `essl_f22` version is pinned in the lock file or requirements.
+- [ ] The `Essl_F22_SDK` version is pinned in the lock file or requirements.
 - [ ] The device model and firmware are recorded against that version.
 - [ ] Upgrades are tested on a non-production device.
 - [ ] The changelog is reviewed before upgrading.

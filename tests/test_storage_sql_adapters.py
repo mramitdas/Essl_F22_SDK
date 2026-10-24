@@ -24,15 +24,19 @@ def test_mysql_requires_a_dsn() -> None:
 def test_postgres_reports_missing_driver(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "psycopg", cast(Any, None))
 
-    with pytest.raises(StorageConfigurationError, match="psycopg"):
+    with pytest.raises(StorageConfigurationError, match="psycopg") as exc_info:
         create_storage("postgres", options={"dsn": "postgresql://user:pass@db/app"})
+
+    assert "install Essl_F22_SDK[postgres]" in str(exc_info.value)
 
 
 def test_mysql_reports_missing_driver(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "pymysql", cast(Any, None))
 
-    with pytest.raises(StorageConfigurationError, match="pymysql"):
+    with pytest.raises(StorageConfigurationError, match="pymysql") as exc_info:
         create_storage("mysql", options={"dsn": "mysql://user:pass@db/app"})
+
+    assert "install Essl_F22_SDK[mysql]" in str(exc_info.value)
 
 
 def test_factory_selects_postgres(
