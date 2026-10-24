@@ -41,7 +41,7 @@ redis = ["redis>=5.2"]
 Homepage = "https://github.com/mramitdas/Essl_F22_SDK"
 Repository = "https://github.com/mramitdas/Essl_F22_SDK"
 Issues = "https://github.com/mramitdas/Essl_F22_SDK/issues"
-Documentation = "https://github.com/mramitdas/Essl_F22_SDK/blob/prod/docs/index.md"
+Documentation = "https://github.com/mramitdas/Essl_F22_SDK/wiki"
 Changelog = "https://github.com/mramitdas/Essl_F22_SDK/blob/prod/CHANGELOG.md"
 
 [tool.hatch.version]
