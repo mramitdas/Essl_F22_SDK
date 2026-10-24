@@ -5,8 +5,9 @@
 [![CI](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml)
 
 Read users, fingerprint templates, attendance, groups, and timezones over TCP;
-block and unblock users without deleting them; and keep a read-only offline
-mirror in SQLite, JSON, memory, PostgreSQL, MySQL, MongoDB, or Redis.
+create, update, and delete users; block and unblock users without deleting
+them; and keep a read-only offline mirror in SQLite, JSON, memory, PostgreSQL,
+MySQL, MongoDB, or Redis.
 
 ## Install
 
@@ -42,6 +43,28 @@ with Device("192.168.1.27", comm_key=0) as device:
 
 The device port defaults to `4370` and the communication key defaults to `0`.
 Pass `port=`, `comm_key=`, `timeout=`, or `encoding=` when needed.
+
+## User management
+
+`set_user()` creates or updates a user by `uid`. `delete_user()` removes a
+user. Both refresh the device and both are device writes.
+
+```python
+from essl_f22 import Device, User
+
+with Device("192.168.1.27", comm_key=0) as device:
+    user = device.get_user(295)
+    user.name = "Updated Name"
+    device.set_user(user)
+
+    test_user = User(uid=296, user_id="sdk-296", name="SDK Test User")
+    device.set_user(test_user)
+    device.delete_user(test_user.uid)
+```
+
+Read the user first and change only the fields you intend to write: `set_user()`
+sends the full 72-byte record. Deleting a user is destructive; verify the
+firmware's treatment of associated data before using it on production devices.
 
 ## Offline mirror
 
@@ -159,7 +182,7 @@ Without `ESSL_F22_HOST`, the hardware test is skipped.
 ```
 src/essl_f22/
   access.py       # non-destructive block/unblock manager
-  device.py       # high-level device API
+  device.py       # high-level device read/write API
   mirror.py       # read-only offline mirror and sync
   models.py       # dataclasses for device records
   protocol.py     # command constants and binary codecs

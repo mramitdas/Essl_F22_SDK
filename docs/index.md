@@ -1,8 +1,8 @@
 # essl_f22
 
-Synchronous Python SDK for eSSL/ZKTeco F22 terminals. The SDK reads device
-records over TCP, provides non-destructive user blocking, and maintains a
-read-only offline mirror in a pluggable storage backend.
+Synchronous Python SDK for eSSL/ZKTeco F22 terminals. The SDK reads and writes
+device records over TCP, provides non-destructive user blocking, and maintains
+a read-only offline mirror in a pluggable storage backend.
 
 ## Install
 
@@ -41,6 +41,26 @@ with Device("192.168.1.27", comm_key=0) as device:
 The default port is `4370`; the default communication key is `0`. The
 constructor also accepts `timeout`, `encoding`, transport/session overrides,
 storage settings, and timezone/group scan limits.
+
+## User management
+
+```python
+from essl_f22 import Device, User
+
+with Device("192.168.1.27", comm_key=0) as device:
+    user = device.get_user(295)
+    user.name = "Updated Name"
+    device.set_user(user)
+
+    test_user = User(uid=296, user_id="sdk-296", name="SDK Test User")
+    device.set_user(test_user)
+    device.delete_user(test_user.uid)
+```
+
+`set_user()` creates or updates by `uid` and sends the full 72-byte user record.
+Read the user first and preserve fields you do not intend to change.
+`delete_user()` removes the user and is destructive. Both calls refresh the
+device after a successful acknowledgement.
 
 ## Offline mirror
 
