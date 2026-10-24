@@ -33,6 +33,10 @@ jobs:
         run: uv run mypy src/
       - name: pytest
         run: uv run pytest
+      - name: Verify README is generated from docs
+        run: |
+          uv run --no-project python scripts/build_pypi_readme.py
+          git diff --exit-code README.md
 
   docs:
     runs-on: ubuntu-latest
