@@ -1,0 +1,44 @@
+name: Branch flow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate pull request branch flow
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "base=${BASE_REF} head=${HEAD_REF}"
+          case "${BASE_REF}" in
+            prod)
+              if [[ "${HEAD_REF}" != "stag" ]]; then
+                echo "prod accepts pull requests only from stag"
+                exit 1
+              fi
+              ;;
+            stag)
+              if [[ "${HEAD_REF}" != "dev" ]]; then
+                echo "stag accepts pull requests only from dev"
+                exit 1
+              fi
+              ;;
+            dev)
+              if [[ ! "${HEAD_REF}" =~ ^(feat|fix|chore|docs|test)/[0-9]+-[a-z0-9-]+$ ]]; then
+                echo "dev accepts pull requests only from <type>/<issue#>-<slug>"
+                exit 1
+              fi
+              ;;
+            *)
+              echo "unsupported base branch: ${BASE_REF}"
+              exit 1
+              ;;
+          esac
+          echo "branch flow is valid"

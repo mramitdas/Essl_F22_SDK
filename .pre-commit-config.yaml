@@ -9,4 +9,4 @@ repos:
     rev: v2.4.0
     hooks:
       - id: mypy
-        additional_dependencies: []
+        additional_dependencies: [pytest]
