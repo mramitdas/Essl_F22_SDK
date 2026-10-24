@@ -92,7 +92,7 @@ ask instead of guessing.
 - `session.py` — connect/auth, command request/response, buffered reads.
 - `models.py` — dataclasses for users, attendance, fingerprints, timezones,
   groups, and device info.
-- `device.py` — high-level device read, blocking, mirror, and sync APIs.
+- `device.py` — high-level device read/write, blocking, mirror, and sync APIs.
 - `mirror.py` — read-only offline mirror and full/incremental sync.
 - `access.py` — non-destructive block/unblock manager.
 - `storage/` — document storage protocols, codecs, built-in backends,

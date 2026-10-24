@@ -5,9 +5,10 @@ import pytest
 
 from essl_f22.device import Device
 from essl_f22.errors import ProtocolError, UserNotFoundError
-from essl_f22.models import DayInterval, GroupInfo, TimeZone, UserTimeZone
+from essl_f22.models import DayInterval, GroupInfo, TimeZone, User, UserTimeZone
 from essl_f22.protocol import (
     CMD_ATTLOG_RRQ,
+    CMD_DELETE_USER,
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
@@ -17,6 +18,7 @@ from essl_f22.protocol import (
     CMD_SET_TIME,
     CMD_TZ_RRQ,
     CMD_TZ_WRQ,
+    CMD_USER_WRQ,
     CMD_USERTEMP_RRQ,
     CMD_USERTZ_RRQ,
     CMD_USERTZ_WRQ,
@@ -174,6 +176,39 @@ def test_get_user_by_user_id_returns_match() -> None:
     session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 5): _user_blob()})
     device = Device("127.0.0.1", session=session)
     assert device.get_user_by_user_id("13").uid == 295
+
+
+def test_set_user_sends_record_and_refreshes() -> None:
+    user = User(uid=296, user_id="sdk-test-19", name="SDK Test 19")
+    session = FakeSession({CMD_USER_WRQ: Response(2000, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    device.set_user(user)
+    assert session.calls == [(CMD_USER_WRQ, user.to_record()), (1013, b"")]
+
+
+def test_delete_user_sends_uid_and_refreshes() -> None:
+    session = FakeSession({CMD_DELETE_USER: Response(2000, b"", 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    device.delete_user(296)
+    assert session.calls == [(CMD_DELETE_USER, struct.pack("<H", 296)), (1013, b"")]
+
+
+@pytest.mark.parametrize("uid", [-1, 0x10000])
+def test_set_user_rejects_uid_outside_16_bits(uid: int) -> None:
+    session = FakeSession({})
+    device = Device("127.0.0.1", session=session)
+    with pytest.raises(ValueError, match="16-bit"):
+        device.set_user(User(uid=uid, user_id="invalid"))
+    assert session.calls == []
+
+
+@pytest.mark.parametrize("uid", [-1, 0x10000])
+def test_delete_user_rejects_uid_outside_16_bits(uid: int) -> None:
+    session = FakeSession({})
+    device = Device("127.0.0.1", session=session)
+    with pytest.raises(ValueError, match="16-bit"):
+        device.delete_user(uid)
+    assert session.calls == []
 
 
 def test_list_fingerprints_parses_buffer() -> None:

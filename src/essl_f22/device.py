@@ -27,6 +27,7 @@ from essl_f22.models import (
 from essl_f22.protocol import (
     CMD_ACK_OK,
     CMD_ATTLOG_RRQ,
+    CMD_DELETE_USER,
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
@@ -36,6 +37,7 @@ from essl_f22.protocol import (
     CMD_SET_TIME,
     CMD_TZ_RRQ,
     CMD_TZ_WRQ,
+    CMD_USER_WRQ,
     CMD_USERTEMP_RRQ,
     CMD_USERTZ_RRQ,
     CMD_USERTZ_WRQ,
@@ -154,6 +156,26 @@ class Device:
             if user.user_id == user_id:
                 return user
         raise UserNotFoundError(f"user id {user_id!r} was not found")
+
+    def set_user(self, user: User) -> None:
+        if not 0 <= user.uid <= 0xFFFF:
+            raise ValueError(
+                f"user uid must fit in an unsigned 16-bit field, got {user.uid}"
+            )
+        response = self._session.send_command(
+            CMD_USER_WRQ, user.to_record(self._encoding)
+        )
+        self._require_ack(response, f"set user {user.uid}")
+        self.refresh_data()
+
+    def delete_user(self, uid: int) -> None:
+        if not 0 <= uid <= 0xFFFF:
+            raise ValueError(
+                f"user uid must fit in an unsigned 16-bit field, got {uid}"
+            )
+        response = self._session.send_command(CMD_DELETE_USER, struct.pack("<H", uid))
+        self._require_ack(response, f"delete user {uid}")
+        self.refresh_data()
 
     def list_fingerprints(self) -> list[FingerprintTemplate]:
         blob = self._session.read_buffer(CMD_USERTEMP_RRQ, 2)
