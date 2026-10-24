@@ -7,17 +7,30 @@ a read-only offline mirror in a pluggable storage backend.
 ## Install
 
 ```bash
-uv sync
+pip install essl_f22
+```
+
+Or with uv:
+
+```bash
+uv add essl_f22
 ```
 
 Optional features:
 
 ```bash
-uv sync --extra postgres
-uv sync --extra mysql
-uv sync --extra mongo
-uv sync --extra redis
-uv sync --extra docs
+pip install "essl_f22[postgres]"
+pip install "essl_f22[mysql]"
+pip install "essl_f22[mongo]"
+pip install "essl_f22[redis]"
+pip install "essl_f22[docs]"
+```
+
+This is a library, not a CLI. `pipx` and `uvx` are application runners; use
+`pip` or `uv` to add `essl_f22` to a project. For a one-off `uvx` run:
+
+```bash
+uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
 ```
 
 Optional storage drivers are imported only when their backend is selected.
