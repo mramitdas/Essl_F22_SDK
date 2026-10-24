@@ -23,8 +23,13 @@ class FakeTransport(Transport):
 
 
 class FakeSession:
-    def __init__(self, responses: dict[int, Response]) -> None:
+    def __init__(
+        self,
+        responses: dict[int, Response],
+        buffers: dict[tuple[int, int], bytes] | None = None,
+    ) -> None:
         self.responses = responses
+        self.buffers = buffers or {}
         self.calls: list[tuple[int, bytes]] = []
 
     def connect(self) -> None: ...
@@ -39,6 +44,8 @@ class FakeSession:
 
     def read_buffer(self, command: int, fct: int = 0, ext: int = 0) -> bytes:
         self.calls.append((command, bytes([fct, ext])))
+        if (command, fct) in self.buffers:
+            return self.buffers[(command, fct)]
         return self.responses[command].data
 
     def refresh_data(self) -> None:

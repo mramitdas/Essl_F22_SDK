@@ -6,15 +6,26 @@ import struct
 from datetime import datetime
 from typing import Self
 
-from essl_f22.errors import CommandError, ProtocolError
-from essl_f22.models import DeviceInfo, FreeSizes
+from essl_f22.errors import CommandError, ProtocolError, UserNotFoundError
+from essl_f22.models import (
+    AttendanceRecord,
+    DeviceInfo,
+    FingerprintTemplate,
+    FreeSizes,
+    User,
+    parse_attendance_records,
+    parse_fingerprint_templates,
+    parse_user_records,
+)
 from essl_f22.protocol import (
     CMD_ACK_OK,
+    CMD_ATTLOG_RRQ,
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
     CMD_OPTIONS_RRQ,
     CMD_SET_TIME,
+    CMD_USERTEMP_RRQ,
     Response,
     decode_device_time,
     encode_device_time,
@@ -91,6 +102,44 @@ class Device:
         if self._serial_number is None:
             self._serial_number = self.get_option("~SerialNumber")
         return self._serial_number
+
+    def list_users(self) -> list[User]:
+        blob = self._session.read_buffer(CMD_USERTEMP_RRQ, 5)
+        if not blob:
+            return []
+        return parse_user_records(blob, self._encoding)
+
+    def get_user(self, uid: int) -> User:
+        for user in self.list_users():
+            if user.uid == uid:
+                return user
+        raise UserNotFoundError(f"user uid {uid} was not found")
+
+    def get_user_by_user_id(self, user_id: str) -> User:
+        for user in self.list_users():
+            if user.user_id == user_id:
+                return user
+        raise UserNotFoundError(f"user id {user_id!r} was not found")
+
+    def list_fingerprints(self) -> list[FingerprintTemplate]:
+        blob = self._session.read_buffer(CMD_USERTEMP_RRQ, 2)
+        if not blob:
+            return []
+        return parse_fingerprint_templates(blob)
+
+    def get_user_fingerprints(self, uid: int) -> list[FingerprintTemplate]:
+        return [
+            template for template in self.list_fingerprints() if template.uid == uid
+        ]
+
+    def list_attendance(self) -> list[AttendanceRecord]:
+        sizes = self.get_free_sizes()
+        if sizes.attendance == 0:
+            return []
+        blob = self._session.read_buffer(CMD_ATTLOG_RRQ)
+        if not blob:
+            return []
+        return parse_attendance_records(blob, sizes.attendance)
 
     def get_free_sizes(self) -> FreeSizes:
         response = self._session.send_command(CMD_GET_FREE_SIZES)

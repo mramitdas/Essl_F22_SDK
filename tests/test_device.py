@@ -4,18 +4,21 @@ from datetime import datetime
 import pytest
 
 from essl_f22.device import Device
-from essl_f22.errors import ProtocolError
+from essl_f22.errors import ProtocolError, UserNotFoundError
 from essl_f22.protocol import (
+    CMD_ATTLOG_RRQ,
     CMD_GET_FREE_SIZES,
     CMD_GET_TIME,
     CMD_GET_VERSION,
     CMD_OPTIONS_RRQ,
     CMD_SET_TIME,
+    CMD_USERTEMP_RRQ,
     Response,
     decode_device_time,
     encode_device_time,
 )
 from tests.fakes import FakeSession
+from tests.test_models import RECORD_HEX
 
 
 def test_get_option_parses_name_value() -> None:
@@ -105,3 +108,107 @@ def test_refresh_data_uses_session() -> None:
 def test_device_time_round_trip() -> None:
     value = datetime(2026, 10, 24, 15, 25, 50)
     assert decode_device_time(encode_device_time(value)) == value
+
+
+def _user_blob() -> bytes:
+    record = bytes.fromhex(RECORD_HEX)
+    return (72).to_bytes(4, "little") + record
+
+
+def _fingerprint_blob() -> bytes:
+    template = b"\xab" * 952
+    entry = (
+        (958).to_bytes(2, "little")
+        + (295).to_bytes(2, "little")
+        + b"\x09"
+        + b"\x01"
+        + template
+    )
+    return (len(entry)).to_bytes(4, "little") + entry
+
+
+def _attendance_blob() -> bytes:
+    timestamp = (26 * 12 * 31 + 9 * 31 + 24 - 1) * 86400 + (15 * 60 + 25) * 60 + 50
+    record = (
+        (295).to_bytes(2, "little")
+        + b"13".ljust(24, b"\x00")
+        + b"\x01"
+        + timestamp.to_bytes(4, "little")
+        + b"\x00"
+        + b"\x00" * 8
+    )
+    return (40).to_bytes(4, "little") + record
+
+
+def test_list_users_parses_buffer() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 5): _user_blob()})
+    device = Device("127.0.0.1", session=session)
+    users = device.list_users()
+    assert len(users) == 1
+    assert users[0].uid == 295
+    assert session.calls == [(CMD_USERTEMP_RRQ, b"\x05\x00")]
+
+
+def test_list_users_returns_empty_for_empty_buffer() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 5): b""})
+    device = Device("127.0.0.1", session=session)
+    assert device.list_users() == []
+
+
+def test_get_user_raises_when_absent() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 5): _user_blob()})
+    device = Device("127.0.0.1", session=session)
+    with pytest.raises(UserNotFoundError):
+        device.get_user(999)
+
+
+def test_get_user_by_user_id_returns_match() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 5): _user_blob()})
+    device = Device("127.0.0.1", session=session)
+    assert device.get_user_by_user_id("13").uid == 295
+
+
+def test_list_fingerprints_parses_buffer() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 2): _fingerprint_blob()})
+    device = Device("127.0.0.1", session=session)
+    templates = device.list_fingerprints()
+    assert len(templates) == 1
+    assert templates[0].fid == 9
+    assert templates[0].flag == 1
+    assert templates[0].size == 958
+    assert session.calls == [(CMD_USERTEMP_RRQ, b"\x02\x00")]
+
+
+def test_get_user_fingerprints_filters_by_uid() -> None:
+    session = FakeSession({}, buffers={(CMD_USERTEMP_RRQ, 2): _fingerprint_blob()})
+    device = Device("127.0.0.1", session=session)
+    assert len(device.get_user_fingerprints(295)) == 1
+    assert device.get_user_fingerprints(999) == []
+
+
+def test_list_attendance_uses_free_size_count() -> None:
+    fields = [0] * 20
+    fields[8] = 1
+    free_sizes = struct.pack("<20i", *fields)
+    session = FakeSession(
+        {CMD_GET_FREE_SIZES: Response(2000, free_sizes, 0, 0)},
+        buffers={(CMD_ATTLOG_RRQ, 0): _attendance_blob()},
+    )
+    device = Device("127.0.0.1", session=session)
+    records = device.list_attendance()
+    assert len(records) == 1
+    assert records[0].uid == 295
+    assert records[0].user_id == "13"
+    assert records[0].timestamp.isoformat() == "2026-10-24T15:25:50"
+    assert session.calls == [
+        (CMD_GET_FREE_SIZES, b""),
+        (CMD_ATTLOG_RRQ, b"\x00\x00"),
+    ]
+
+
+def test_list_attendance_skips_read_when_count_is_zero() -> None:
+    free_sizes = struct.pack("<20i", *([0] * 20))
+    session = FakeSession({CMD_GET_FREE_SIZES: Response(2000, free_sizes, 0, 0)})
+    device = Device("127.0.0.1", session=session)
+    assert device.list_attendance() == []
+    assert session.calls == [(CMD_GET_FREE_SIZES, b"")]
