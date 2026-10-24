@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to essl_f22.
+Thanks for your interest in contributing to the Essl F22 SDK.
 
 ## Workflow
 

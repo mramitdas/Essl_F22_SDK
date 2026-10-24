@@ -20,6 +20,9 @@ build/
 dist/
 *.egg-info/
 
+# Documentation build
+site/
+
 # OS / editor
 .DS_Store
 .idea/

@@ -2,8 +2,7 @@
 
 ## Supported versions
 
-Only the latest released version of essl_f22 receives
-security updates.
+Only the latest released version of the Essl F22 SDK receives security updates.
 
 ## Reporting a vulnerability
 

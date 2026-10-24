@@ -1,6 +1,6 @@
-# essl_f22
+# Essl F22 SDK
 
-**Synchronous Python SDK for eSSL/ZKTeco F22 terminals.**
+**A synchronous Python SDK for eSSL/ZKTeco F22 terminals.**
 
 [![CI](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml)
 
@@ -8,6 +8,14 @@ Read users, fingerprint templates, attendance, groups, and timezones over TCP;
 create, update, and delete users; block and unblock users without deleting
 them; and keep a read-only offline mirror in SQLite, JSON, memory, PostgreSQL,
 MySQL, MongoDB, or Redis.
+
+## Documentation
+
+The full handbook for the Essl F22 SDK starts at
+[docs/index.md](https://github.com/mramitdas/essl-f22-sdk/blob/dev/docs/index.md).
+It covers installation, first connection, the device record model, access
+control, storage, API reference, troubleshooting, compatibility, and release
+work.
 
 ## Install
 
@@ -222,5 +230,5 @@ tests/
 
 ## License
 
-essl_f22 is distributed under the terms of the Apache License 2.0. See
+The Essl F22 SDK is distributed under the terms of the Apache License 2.0. See
 `LICENSE` for details.
