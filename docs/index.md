@@ -84,7 +84,7 @@ Install the package in a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install essl_f22
+pip install Essl_F22_SDK
 ```
 
 Then read the device identity and the first few users:
@@ -145,7 +145,7 @@ and [Troubleshooting](help/troubleshooting.md) before changing device settings.
 
 ## Project facts
 
-- **Distribution name:** `essl_f22`
+- **Distribution name:** `Essl_F22_SDK`
 - **Import name:** `essl_f22`
 - **Python:** 3.12 or newer
 - **Transport:** TCP, default port `4370`
@@ -153,10 +153,11 @@ and [Troubleshooting](help/troubleshooting.md) before changing device settings.
 - **Optional storage drivers:** PostgreSQL, MySQL, MongoDB, Redis
 - **License:** Apache License 2.0
 
-The package name is `essl_f22` everywhere: in `pyproject.toml`, in pip and uv
-commands, in documentation, and in imports. Some package tools display the
-normalized spelling `essl-f22` because PEP 503 treats hyphens and underscores
-as equivalent. That is a display convention, not a different package.
+The distribution name is `Essl_F22_SDK` everywhere: in `pyproject.toml`, in pip and
+uv commands, and in documentation. The import name is `essl_f22`. Some package
+tools display the normalized spelling `essl-f22-sdk` because PEP 503 treats
+hyphens, underscores, and periods as equivalent. That is a display convention,
+not a different package.
 
 ## Where to go next
 

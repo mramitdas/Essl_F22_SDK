@@ -24,9 +24,9 @@ Configure a **pending trusted publisher** on PyPI:
 
 | Field | Value |
 | --- | --- |
-| PyPI project | `essl_f22` |
+| PyPI project | `Essl_F22_SDK` |
 | Owner | `mramitdas` |
-| Repository | `essl-f22-sdk` |
+| Repository | `Essl_F22_SDK` |
 | Workflow filename | `release.yml` |
 | Environment | `pypi` |
 
@@ -86,7 +86,7 @@ Install the wheel into a clean environment:
 uv venv --python 3.14 /tmp/essl_f22-release
 uv pip install --python /tmp/essl_f22-release/bin/python dist/*.whl
 /tmp/essl_f22-release/bin/python -c \
-  "from importlib.metadata import version; import essl_f22; from essl_f22 import Device; assert essl_f22.__version__ == version('essl_f22'); print(essl_f22.__version__, Device)"
+  "from importlib.metadata import version; import essl_f22; from essl_f22 import Device; assert essl_f22.__version__ == version('Essl_F22_SDK'); print(essl_f22.__version__, Device)"
 ```
 
 Check:
@@ -117,7 +117,7 @@ Do not tag a commit that is not on `prod`.
 ```bash
 git checkout prod
 git pull --ff-only origin prod
-git tag -a v0.1.0 -m "essl_f22 0.1.0"
+git tag -a v0.1.0 -m "Essl F22 SDK 0.1.0"
 git push origin v0.1.0
 ```
 
@@ -151,9 +151,9 @@ the version.
 
 ```bash
 uv venv --python 3.14 /tmp/essl_f22-pypi
-uv pip install --python /tmp/essl_f22-pypi/bin/python essl_f22==0.1.0
+uv pip install --python /tmp/essl_f22-pypi/bin/python Essl_F22_SDK==0.1.0
 /tmp/essl_f22-pypi/bin/python -c \
-  "from importlib.metadata import version; import essl_f22; print(version('essl_f22'), essl_f22.__version__)"
+  "from importlib.metadata import version; import essl_f22; print(version('Essl_F22_SDK'), essl_f22.__version__)"
 ```
 
 Also verify:
@@ -193,7 +193,7 @@ Check:
 - the GitHub environment name is exactly `pypi`;
 - the workflow is running from the tagged `prod` commit;
 - the repository has the expected permissions;
-- the PyPI project name is `essl_f22`.
+- the PyPI project name is `Essl_F22_SDK`.
 
 A `404` on the PyPI project page before the first release is expected.
 
@@ -227,4 +227,4 @@ A `404` on the PyPI project page before the first release is expected.
 
 - [Development](development.md)
 - [Compatibility](../help/compatibility.md)
-- [CI workflow](https://github.com/mramitdas/essl-f22-sdk/blob/dev/.github/workflows/ci.yml)
+- [CI workflow](https://github.com/mramitdas/Essl_F22_SDK/blob/dev/.github/workflows/ci.yml)

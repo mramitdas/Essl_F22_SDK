@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded README with requirements, installation, quickstart, common tasks,
   storage, safety, compatibility, error handling, and development guidance.
 
+### Changed
+
+- Renamed the PyPI distribution from `essl_f22` to `Essl_F22_SDK`; the Python
+  import remains `essl_f22`.
+
 ## [0.1.0] - 2026-10-24
 
 ### Added

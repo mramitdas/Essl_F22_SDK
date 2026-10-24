@@ -3,8 +3,8 @@
 Plain-language definitions for terms used in this handbook.
 
 **Essl F22 SDK**<br>
-The Python library described by this handbook. Its distribution and import name
-is `essl_f22`.
+The Python library described by this handbook. Its distribution name is
+`Essl_F22_SDK` and its import name is `essl_f22`.
 
 ## Device terms
 
@@ -217,11 +217,11 @@ A built Python package file (`.whl`) that can be installed directly.
 A source distribution archive.
 
 **Extra**<br>
-An optional dependency group, such as `essl_f22[postgres]`.
+An optional dependency group, such as `Essl_F22_SDK[postgres]`.
 
 **PEP 503**<br>
-The Python packaging normalization rule that treats `-` and `_` as equivalent in
-project names. It is why tools may display `essl-f22`.
+The Python packaging normalization rule that treats `-`, `_`, and `.` as
+equivalent in project names. It is why tools may display `essl-f22-sdk`.
 
 **uv**<br>
 A Python package and environment manager used by this project.
