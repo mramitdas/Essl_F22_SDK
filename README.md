@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](https://github.com/mramitdas/Essl_F22_SDK)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
+Essl_F22_SDK 0.1.0 is published on PyPI.
+
 The Essl F22 SDK talks directly to an F22-compatible attendance and access
 terminal over TCP. It reads the records that already exist on the device,
 supports selected writes, and keeps a read-only offline mirror in a local file
@@ -17,17 +19,12 @@ the device.
 
 ## What you can do
 
-- Read device information, serial number, firmware version, and capacity.
-- Read users, attendance records, fingerprint metadata and templates, groups,
-  timezones, and per-user access assignments.
-- Create, update, and delete users.
-- Write groups, timezones, and user-timezone assignments.
-- Block and unblock a user by changing their access schedule without deleting
-  the user or their fingerprint templates.
-- Sync the device into a read-only mirror backed by SQLite, JSON, memory,
-  PostgreSQL, MySQL, MongoDB, or Redis.
-- Use the SDK on Python 3.12 or newer with no required runtime dependencies
-  beyond the standard library.
+- **Read device records** — device information, serial number, firmware version, capacity, users, attendance records, fingerprint metadata and templates, groups, timezones, and per-user access assignments.
+- **Manage users** — create, update, and delete users.
+- **Change access schedules** — write groups, timezones, and user-timezone assignments.
+- **Block and unblock users** — change an access schedule without deleting the user or their fingerprint templates.
+- **Mirror device data** — sync the device into a read-only mirror backed by SQLite, JSON, memory, PostgreSQL, MySQL, MongoDB, or Redis.
+- **No required runtime dependencies** — Python 3.12 or newer; optional storage extras only when you use those databases.
 
 ## Requirements
 

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "Essl_F22_SDK"
 dynamic = ["version"]
-description = "Essl F22 SDK: synchronous Python SDK for eSSL/ZKTeco F22 terminals."
+description = "Synchronous Python SDK for eSSL/ZKTeco F22 attendance and access terminals: read users/attendance/fingerprints, manage users and access schedules, and mirror device data read-only."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
@@ -14,6 +14,7 @@ authors = [
 requires-python = ">=3.12"
 keywords = ["attendance", "biometric", "essl", "f22", "sdk", "zkteco"]
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
@@ -40,6 +41,8 @@ redis = ["redis>=5.2"]
 Homepage = "https://github.com/mramitdas/Essl_F22_SDK"
 Repository = "https://github.com/mramitdas/Essl_F22_SDK"
 Issues = "https://github.com/mramitdas/Essl_F22_SDK/issues"
+Documentation = "https://github.com/mramitdas/Essl_F22_SDK/blob/prod/docs/index.md"
+Changelog = "https://github.com/mramitdas/Essl_F22_SDK/blob/prod/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/essl_f22/__init__.py"
