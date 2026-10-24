@@ -2,8 +2,8 @@
 
 **A synchronous Python SDK for eSSL/ZKTeco F22 attendance and access terminals.**
 
-[![CI](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/essl-f22-sdk/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](https://github.com/mramitdas/essl-f22-sdk)
+[![CI](https://github.com/mramitdas/Essl_F22_SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/mramitdas/Essl_F22_SDK/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](https://github.com/mramitdas/Essl_F22_SDK)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
 The Essl F22 SDK talks directly to an F22-compatible attendance and access
@@ -44,40 +44,41 @@ the default test suite do not import them.
 ## Installation
 
 ```bash
-pip install essl_f22
+pip install Essl_F22_SDK
 ```
 
 With uv:
 
 ```bash
-uv add essl_f22
+uv add Essl_F22_SDK
 ```
 
 Optional extras:
 
 ```bash
-pip install "essl_f22[postgres]"
-pip install "essl_f22[mysql]"
-pip install "essl_f22[mongo]"
-pip install "essl_f22[redis]"
-pip install "essl_f22[docs]"
+pip install "Essl_F22_SDK[postgres]"
+pip install "Essl_F22_SDK[mysql]"
+pip install "Essl_F22_SDK[mongo]"
+pip install "Essl_F22_SDK[redis]"
+pip install "Essl_F22_SDK[docs]"
 ```
 
 The same extras work with uv:
 
 ```bash
-uv add "essl_f22[postgres]"
+uv add "Essl_F22_SDK[postgres]"
 ```
 
 `pipx` and `uvx` are application runners. They do not make a library importable
 in another project. For a one-off run with `uvx`:
 
 ```bash
-uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
+uvx --from Essl_F22_SDK python -c "from essl_f22 import Device; print(Device)"
 ```
 
-The distribution name is `essl_f22`. Some package tools display the normalized
-spelling `essl-f22`; that is the same package.
+The distribution name is `Essl_F22_SDK`. Some package tools display the
+normalized spelling `essl-f22-sdk`; that is the same package. The import name is
+`essl_f22`.
 
 ## Quick start
 
@@ -368,7 +369,7 @@ the device status code. `DeviceTimeoutError` is ambiguous for writes: the device
 may have applied the command before the response was lost, so read the current
 state before retrying.
 
-See the [error reference](https://github.com/mramitdas/essl-f22-sdk/blob/prod/docs/reference/errors.md)
+See the [error reference](https://github.com/mramitdas/Essl_F22_SDK/blob/prod/docs/reference/errors.md)
 for the full hierarchy.
 
 ## Safety and limits
@@ -410,13 +411,13 @@ uv run pytest -m hardware
 ```
 
 It is skipped when `ESSL_F22_HOST` is unset. Read the
-[compatibility guide](https://github.com/mramitdas/essl-f22-sdk/blob/prod/docs/help/compatibility.md)
+[compatibility guide](https://github.com/mramitdas/Essl_F22_SDK/blob/prod/docs/help/compatibility.md)
 before deploying against a new firmware or OEM build.
 
 ## Documentation
 
 The full handbook starts at
-[docs/index.md](https://github.com/mramitdas/essl-f22-sdk/blob/prod/docs/index.md).
+[docs/index.md](https://github.com/mramitdas/Essl_F22_SDK/blob/prod/docs/index.md).
 It covers:
 
 - installation and first connection;

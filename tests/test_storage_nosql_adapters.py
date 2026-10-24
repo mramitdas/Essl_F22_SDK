@@ -20,15 +20,19 @@ def test_redis_requires_a_url() -> None:
 def test_mongo_reports_missing_driver(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "pymongo", cast(Any, None))
 
-    with pytest.raises(StorageConfigurationError, match="pymongo"):
+    with pytest.raises(StorageConfigurationError, match="pymongo") as exc_info:
         create_storage("mongo", options={"uri": "mongodb://localhost/app"})
+
+    assert "install Essl_F22_SDK[mongo]" in str(exc_info.value)
 
 
 def test_redis_reports_missing_driver(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "redis", cast(Any, None))
 
-    with pytest.raises(StorageConfigurationError, match="redis"):
+    with pytest.raises(StorageConfigurationError, match="redis") as exc_info:
         create_storage("redis", options={"url": "redis://localhost/0"})
+
+    assert "install Essl_F22_SDK[redis]" in str(exc_info.value)
 
 
 def test_factory_selects_mongo(monkeypatch: pytest.MonkeyPatch) -> None:

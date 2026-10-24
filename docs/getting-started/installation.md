@@ -51,13 +51,13 @@ command below assumes the environment is active.
 === "pip"
 
     ```bash
-    python -m pip install essl_f22
+    python -m pip install Essl_F22_SDK
     ```
 
 === "uv"
 
     ```bash
-    uv add essl_f22
+    uv add Essl_F22_SDK
     ```
 
 Inside an existing uv project, `uv add` records the dependency in
@@ -65,12 +65,12 @@ Inside an existing uv project, `uv add` records the dependency in
 from the lock file.
 
 !!! note "Release availability"
-    This handbook assumes `essl_f22` is available from your configured package
+    This handbook assumes `Essl_F22_SDK` is available from your configured package
     index. If you are working before the first public release, install a wheel
     built from the repository:
 
     ```bash
-    python -m pip install /path/to/essl_f22-0.1.0-py3-none-any.whl
+    python -m pip install /path/to/essl_f22_sdk-0.1.0-py3-none-any.whl
     ```
 
     Do not install from an untrusted index or an unofficial package with a
@@ -109,16 +109,16 @@ MongoDB driver.
 Install only what you need:
 
 ```bash
-python -m pip install "essl_f22[postgres]"
-python -m pip install "essl_f22[mysql]"
-python -m pip install "essl_f22[mongo]"
-python -m pip install "essl_f22[redis]"
+python -m pip install "Essl_F22_SDK[postgres]"
+python -m pip install "Essl_F22_SDK[mysql]"
+python -m pip install "Essl_F22_SDK[mongo]"
+python -m pip install "Essl_F22_SDK[redis]"
 ```
 
 With uv:
 
 ```bash
-uv add "essl_f22[postgres]"
+uv add "Essl_F22_SDK[postgres]"
 ```
 
 If you select a backend without its extra, the SDK raises
@@ -127,8 +127,8 @@ the backend. The core import still works because drivers are loaded lazily.
 
 ## This is a library, not a CLI
 
-There is no `essl-f22` command and no console entry point. After installation
-you write Python code that imports the package.
+There is no console entry point. After installation you write Python code that
+imports the package.
 
 `pipx` and `uvx` are application runners. They can run a Python command in an
 isolated environment, but they do not add the library to your project's
@@ -137,7 +137,7 @@ interpreter. Use `pip` or `uv add` for normal project use.
 For a one-off import check with uv:
 
 ```bash
-uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
+uvx --from Essl_F22_SDK python -c "from essl_f22 import Device; print(Device)"
 ```
 
 That command runs `python` inside a temporary environment. It does not make
@@ -148,13 +148,13 @@ That command runs `python` inside a temporary environment. It does not make
 === "pip"
 
     ```bash
-    python -m pip install --upgrade essl_f22
+    python -m pip install --upgrade Essl_F22_SDK
     ```
 
 === "uv"
 
     ```bash
-    uv sync --upgrade-package essl_f22
+    uv sync --upgrade-package Essl_F22_SDK
     ```
 
 Read the project changelog before upgrading across minor versions. Record,
@@ -163,7 +163,7 @@ storage, and error behaviour can change even when the core API stays familiar.
 ## Uninstalling
 
 ```bash
-python -m pip uninstall essl_f22
+python -m pip uninstall Essl_F22_SDK
 ```
 
 Uninstalling the package does not delete your mirror, SQLite state database, or
@@ -172,13 +172,15 @@ backup, if you no longer need them.
 
 ## Package-name spelling
 
-The distribution and import name are `essl_f22`. Some tools display
-`essl-f22` because Python package normalization (PEP 503) treats `-` and `_` as
-equivalent. Use `essl_f22` in `pyproject.toml`, install commands, imports, and
-documentation.
+The distribution name is `Essl_F22_SDK`; the import name is `essl_f22`. Some
+tools display the normalized spelling `essl-f22-sdk` because Python package
+normalization (PEP 503) treats hyphens, underscores, and periods as equivalent.
+Use the distribution name in `pyproject.toml`, install commands, and
+documentation; use the import name in Python code.
 
-If `pip show essl_f22` reports the package but `pip show essl-f22` does not (or
-the reverse), that is normal spelling normalization, not a second package.
+If `pip show Essl_F22_SDK` reports the package but `pip show essl-f22-sdk` does
+not (or the reverse), that is normal spelling normalization, not a second
+package.
 
 ## Next step
 

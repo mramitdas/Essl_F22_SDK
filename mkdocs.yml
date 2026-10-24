@@ -1,7 +1,7 @@
 site_name: Essl F22 SDK
 site_description: "The plain-language handbook and API reference for the Essl F22 SDK."
-repo_url: https://github.com/mramitdas/essl-f22-sdk
-repo_name: mramitdas/essl-f22-sdk
+repo_url: https://github.com/mramitdas/Essl_F22_SDK
+repo_name: mramitdas/Essl_F22_SDK
 edit_uri: edit/dev/docs/
 
 theme:

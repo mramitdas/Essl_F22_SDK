@@ -390,7 +390,7 @@ wheels = [
 ]
 
 [[package]]
-name = "essl-f22"
+name = "essl-f22-sdk"
 source = { editable = "." }
 
 [package.optional-dependencies]

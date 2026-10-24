@@ -47,7 +47,7 @@ class PostgresStorage(DocumentStorage):
         except ImportError as exc:
             raise StorageConfigurationError(
                 "PostgreSQL storage requires psycopg from the 'postgres' extra: "
-                "install essl_f22[postgres]"
+                "install Essl_F22_SDK[postgres]"
             ) from exc
         self._driver: Any = psycopg
         self._error: Any = psycopg.Error

@@ -60,19 +60,21 @@ would make destructive device writes too easy to run accidentally.
 ## Can I use pipx or uvx?
 
 `pipx` and `uvx` are application runners. They do not make the library
-importable in your project. Use `pip install essl_f22` or `uv add essl_f22`.
+importable in your project. Use `pip install Essl_F22_SDK` or `uv add
+Essl_F22_SDK`.
 
 For a one-off import check:
 
 ```bash
-uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
+uvx --from Essl_F22_SDK python -c "from essl_f22 import Device; print(Device)"
 ```
 
-## Why do some tools show `essl-f22` instead of `essl_f22`?
+## Why do some tools show `essl-f22-sdk` instead of `Essl_F22_SDK`?
 
-PEP 503 normalization treats hyphens and underscores as equivalent. The
-distribution and import name are `essl_f22`. The hyphenated spelling is a
-display convention, not a different package.
+PEP 503 normalization treats hyphens, underscores, and periods as equivalent. The
+distribution name is `Essl_F22_SDK`; the import name is `essl_f22`. The normalized
+spelling is `essl-f22-sdk`; the hyphenated spelling is a display convention, not a
+different package.
 
 ## Which Python versions are supported?
 

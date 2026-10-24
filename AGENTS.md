@@ -39,7 +39,7 @@ the first three sections are rewritten.
   branches** (`<type>/<issue#>-<slug>`).
 - Feature/issue branches target `dev`. Promotion through the chain happens
   via PRs only, one hop at a time.
-- Remote `origin` is `https://github.com/mramitdas/essl-f22-sdk`; all
+- Remote `origin` is `https://github.com/mramitdas/Essl_F22_SDK`; all
   changes land through PRs and no direct pushes to integration branches are
   permitted.
 - Server-side branch protection is unavailable on the private free-plan
