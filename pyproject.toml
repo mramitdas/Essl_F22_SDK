@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "essl_f22"
 dynamic = ["version"]
-description = "Synchronous Python SDK for eSSL/ZKTeco F22 terminals."
+description = "Essl F22 SDK: synchronous Python SDK for eSSL/ZKTeco F22 terminals."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [

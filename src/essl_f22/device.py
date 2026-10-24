@@ -56,7 +56,7 @@ from essl_f22.transport import Transport
 
 
 class Device:
-    """A high-level client for an eSSL F22 terminal."""
+    """A high-level client for an eSSL/ZKTeco F22 terminal."""
 
     def __init__(
         self,

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Complete layperson-friendly handbook with concepts, guides, reference, help,
+  and contributing pages, plus a strict MkDocs build in CI.
+
 ## [0.1.0] - 2026-10-24
 
 ### Added
