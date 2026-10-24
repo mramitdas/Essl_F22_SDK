@@ -1,4 +1,4 @@
-"""ZKTeco protocol primitives for the eSSL F22 SDK."""
+"""ZKTeco protocol primitives for the Essl F22 SDK."""
 
 from __future__ import annotations
 

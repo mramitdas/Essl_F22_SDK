@@ -1,4 +1,4 @@
-"""TCP transport for the eSSL F22 SDK."""
+"""TCP transport for the Essl F22 SDK."""
 
 from __future__ import annotations
 

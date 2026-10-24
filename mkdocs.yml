@@ -1,10 +1,104 @@
-site_name: essl_f22
-site_description: "Synchronous Python SDK for eSSL/ZKTeco F22 terminals."
+site_name: Essl F22 SDK
+site_description: "The plain-language handbook and API reference for the Essl F22 SDK."
+site_url: https://mramitdas.github.io/essl-f22-sdk/
+repo_url: https://github.com/mramitdas/essl-f22-sdk
+repo_name: mramitdas/essl-f22-sdk
+edit_uri: edit/dev/docs/
+
 theme:
   name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.tracking
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
 nav:
   - Home: index.md
+  - Start here:
+      - What this is: getting-started/what-is-this.md
+      - Installation: getting-started/installation.md
+      - First connection: getting-started/first-connection.md
+      - Quickstart: getting-started/quickstart.md
+  - Concepts:
+      - How it works: concepts/how-it-works.md
+      - Users: concepts/users.md
+      - Attendance: concepts/attendance.md
+      - Fingerprints: concepts/fingerprints.md
+      - Access control and blocking: concepts/access-control.md
+      - Mirror and storage: concepts/mirror-and-storage.md
+  - Guides:
+      - Manage users: guides/manage-users.md
+      - Block and unblock: guides/block-and-unblock.md
+      - Back up and sync: guides/back-up-and-sync.md
+      - Choose storage: guides/choose-storage.md
+      - Handle errors: guides/handle-errors.md
+      - Production checklist: guides/production-checklist.md
+  - Reference:
+      - Device API: reference/device-api.md
+      - Models: reference/models.md
+      - Errors: reference/errors.md
+      - Storage: reference/storage.md
+      - Protocol internals: reference/protocol.md
+  - Help:
+      - Troubleshooting: help/troubleshooting.md
+      - FAQ: help/faq.md
+      - Glossary: help/glossary.md
+      - Compatibility: help/compatibility.md
+  - Contributing:
+      - Development: contributing/development.md
+      - Release: contributing/release.md
+
 markdown_extensions:
   - admonition
-  - pymdownx.highlight
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: info
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: info
+    unrecognized_links: info
+
+exclude_docs: |
+  superpowers/

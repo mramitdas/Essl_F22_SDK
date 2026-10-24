@@ -1,186 +1,166 @@
-# essl_f22
+# Essl F22 SDK
 
-Synchronous Python SDK for eSSL/ZKTeco F22 terminals. The SDK reads and writes
-device records over TCP, provides non-destructive user blocking, and maintains
-a read-only offline mirror in a pluggable storage backend.
+**A synchronous Python SDK for eSSL/ZKTeco F22 attendance and access terminals.**
 
-## Install
+The Essl F22 SDK lets a Python program talk directly to a compatible device over the
+local network. You can read the people, attendance, fingerprint metadata,
+groups, and access schedules stored on the device. You can also create,
+update, and delete users, change access schedules, and keep a read-only copy of
+the device data in a local or remote database.
+
+!!! note "In plain English"
+    The terminal is the filing cabinet. The Essl F22 SDK is the set of labelled
+    drawers, forms, and procedures your Python program uses to read and update
+    that cabinet. It does **not** replace the device, and it does **not** create
+    attendance by itself.
+
+## What this handbook is for
+
+This handbook is written for two readers at the same time:
+
+- **Operators and administrators** who need to understand what the SDK can do
+  safely before anyone runs it against a live device.
+- **Python developers** who need exact method names, record fields, storage
+  behaviour, and failure modes.
+
+Every topic explains three things:
+
+1. **Why it matters** — the real-world problem the feature solves.
+2. **What it is** — the device concept and the SDK object that represents it.
+3. **How to use it** — a small example, the expected result, and the traps.
+
+## Is this the right tool?
+
+Use the Essl F22 SDK when you need to:
+
+- pull attendance from an F22-compatible terminal into your own system;
+- manage users from Python without using the vendor's desktop software;
+- keep a local or database-backed backup of device records;
+- temporarily block a person's access without deleting their user record or
+  fingerprint templates;
+- inspect the device's groups, timezones, and access assignments.
+
+Do **not** use it when you need to:
+
+- enroll a fingerprint (enrollment happens at the device);
+- perform fingerprint matching in Python;
+- manage firmware, network settings, or the device's boot process;
+- expose the device directly to the public internet;
+- get a graphical interface or a command-line application. This is a library.
+
+## Learning paths
+
+### I need to understand the system before touching a device
+
+1. [What this is](getting-started/what-is-this.md)
+2. [How it works](concepts/how-it-works.md)
+3. [First connection](getting-started/first-connection.md)
+4. [Production checklist](guides/production-checklist.md)
+
+### I need to write a program now
+
+1. [Installation](getting-started/installation.md)
+2. [Quickstart](getting-started/quickstart.md)
+3. [Device API](reference/device-api.md)
+4. [Handle errors](guides/handle-errors.md)
+
+### I need to back up attendance
+
+1. [Attendance](concepts/attendance.md)
+2. [Mirror and storage](concepts/mirror-and-storage.md)
+3. [Back up and sync](guides/back-up-and-sync.md)
+4. [Choose storage](guides/choose-storage.md)
+
+### I need to block someone without deleting them
+
+1. [Access control and blocking](concepts/access-control.md)
+2. [Block and unblock](guides/block-and-unblock.md)
+3. [Production checklist](guides/production-checklist.md)
+
+## A five-minute example
+
+Install the package in a virtual environment:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install essl_f22
 ```
 
-Or with uv:
-
-```bash
-uv add essl_f22
-```
-
-Optional features:
-
-```bash
-pip install "essl_f22[postgres]"
-pip install "essl_f22[mysql]"
-pip install "essl_f22[mongo]"
-pip install "essl_f22[redis]"
-pip install "essl_f22[docs]"
-```
-
-This is a library, not a CLI. `pipx` and `uvx` are application runners; use
-`pip` or `uv` to add `essl_f22` to a project. For a one-off `uvx` run:
-
-```bash
-uvx --from essl_f22 python -c "from essl_f22 import Device; print(Device)"
-```
-
-Optional storage drivers are imported only when their backend is selected.
-
-## Device usage
+Then read the device identity and the first few users:
 
 ```python
 from essl_f22 import Device
 
 with Device("192.168.1.27", comm_key=0) as device:
     info = device.get_device_info()
-    print(info.serial_number, info.firmware_version)
+    print(info.device_name, info.serial_number, info.firmware_version)
 
-    users = device.list_users()
-    fingerprints = device.list_fingerprints()
-    attendance = device.list_attendance()
-    groups = device.list_groups()
-    timezones = device.list_timezones()
+    for user in device.list_users()[:5]:
+        print(user.uid, user.user_id, user.name)
 ```
 
-The default port is `4370`; the default communication key is `0`. The
-constructor also accepts `timeout`, `encoding`, transport/session overrides,
-storage settings, and timezone/group scan limits.
+`Device(...)` does not open the network connection by itself. The `with` block
+calls `connect()` on entry and `close()` on exit. The default port is `4370`.
+The communication key is a device setting; `0` is the default, not a guarantee.
 
-## User management
+If the connection fails, read [First connection](getting-started/first-connection.md)
+and [Troubleshooting](help/troubleshooting.md) before changing device settings.
 
-```python
-from essl_f22 import Device, User
+## Safety in one screen
 
-with Device("192.168.1.27", comm_key=0) as device:
-    user = device.get_user(295)
-    user.name = "Updated Name"
-    device.set_user(user)
+!!! warning "Writes are real"
+    `set_user()`, `delete_user()`, `set_timezone()`, `set_group()`, and
+    `set_user_timezone()` change the live device. `delete_user()` is
+    destructive. Test on a non-production device first, and keep a backup of
+    the data you are about to change.
 
-    test_user = User(uid=296, user_id="sdk-296", name="SDK Test User")
-    device.set_user(test_user)
-    device.delete_user(test_user.uid)
-```
+!!! warning "Blocking is not deleting"
+    `block_user()` changes a person's access schedule. It does not remove the
+    user or their fingerprint templates. `unblock_user()` restores the saved
+    schedule when the SDK's state store still has it. Back up the state store
+    before relying on it.
 
-`set_user()` creates or updates by `uid` and sends the full 72-byte user record.
-Read the user first and preserve fields you do not intend to change.
-`delete_user()` removes the user and is destructive. Both calls refresh the
-device after a successful acknowledgement.
+!!! warning "Biometric data is sensitive"
+    `list_fingerprints()` returns raw fingerprint template bytes. Do not log
+    them, commit them, or copy them into a mirror. The built-in mirror stores
+    only metadata. Treat templates like passwords or identity documents.
 
-## Offline mirror
+!!! warning "The mirror is a copy, not a restore button"
+    The SDK's mirror is read-only. It can help you report on and compare
+    device data, but it cannot write users, attendance, or templates back to a
+    device. It stores full user records, including device user password fields.
+    A real backup and restore plan must be tested separately.
 
-```python
-from essl_f22 import Device
+## Documentation map
 
-with Device(
-    "192.168.1.27",
-    comm_key=0,
-    storage_backend="sqlite",
-) as device:
-    result = device.sync("full")
-    mirror = device.mirror()
+| Section | Read it when you need to… |
+| --- | --- |
+| [Start here](getting-started/what-is-this.md) | Understand the product, install it, and make a first connection. |
+| [Concepts](concepts/how-it-works.md) | Learn how device records, access schedules, and storage fit together. |
+| [Guides](guides/manage-users.md) | Perform a specific job safely, step by step. |
+| [Reference](reference/device-api.md) | Look up an exact method, field, exception, or protocol detail. |
+| [Help](help/troubleshooting.md) | Diagnose a failure, check compatibility, or look up a term. |
+| [Contributing](contributing/development.md) | Work on the SDK itself, run quality gates, or prepare a release. |
 
-    print(result.users, result.groups, result.attendance)
-    print(mirror.get_user(295))
-    print(mirror.list_attendance(uid=295, limit=10))
-    print(mirror.get_sync_state())
-```
+## Project facts
 
-Sync modes:
+- **Distribution name:** `essl_f22`
+- **Import name:** `essl_f22`
+- **Python:** 3.12 or newer
+- **Transport:** TCP, default port `4370`
+- **Core runtime dependencies:** none
+- **Optional storage drivers:** PostgreSQL, MySQL, MongoDB, Redis
+- **License:** Apache License 2.0
 
-- `full` replaces all mirrored collections and attendance.
-- `incremental` upserts attendance by a stable record hash. If the device
-  attendance count drops below the mirror count, attendance is replaced
-  instead. Other collections are replaced on every sync.
+The package name is `essl_f22` everywhere: in `pyproject.toml`, in pip and uv
+commands, in documentation, and in imports. Some package tools display the
+normalized spelling `essl-f22` because PEP 503 treats hyphens and underscores
+as equivalent. That is a display convention, not a different package.
 
-The mirror never stores fingerprint template bytes, only metadata (`uid`,
-`fid`, `flag`, `size`). It is read-only; writes require a connected `Device`.
+## Where to go next
 
-## Storage backends
-
-| Backend | Extra | Connection value |
-| --- | --- | --- |
-| `sqlite` | none | `storage_path` (default `state.db`) |
-| `json` | none | `storage_path` (default `mirror.json`) |
-| `memory` | none | none |
-| `postgres` | `postgres` | `storage_options={"dsn": ...}` |
-| `mysql` | `mysql` | `storage_options={"dsn": ...}` |
-| `mongo` | `mongo` | `storage_options={"uri": ...}` |
-| `redis` | `redis` | `storage_options={"url": ...}` |
-
-```python
-from essl_f22 import Device
-
-device = Device(
-    "192.168.1.27",
-    comm_key=0,
-    storage_backend="postgres",
-    storage_options={"dsn": "postgresql://user:pass@db/app"},
-)
-```
-
-`storage_options` takes precedence over `storage_path`. An injected `storage=`
-object takes precedence over both. A `Device` closes only storage it created.
-
-Default paths are available as `default_state_path()`, `default_mirror_path()`,
-and `default_data_dir()`.
-
-## Blocking
-
-```python
-blocked = device.block_user(13)
-print(blocked.block_timezone_slot)
-
-restored = device.unblock_user(13)
-print(restored.restored)
-```
-
-Blocking assigns a deny-all access timezone and saves the original assignment.
-It never deletes users or fingerprint templates. The manager reuses an existing
-deny-all slot or allocates the highest free default-allow-all slot. If no slot
-is free, `NoFreeTimeZoneSlotError` is raised. Blocking is idempotent.
-
-## Development
-
-```bash
-uv run pytest
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src/ tests/
-uv run pre-commit run --all-files
-```
-
-Storage integration tests are skipped unless their environment values are set:
-
-```bash
-ESSL_F22_POSTGRES_DSN=postgresql://user:pass@db/app \
-ESSL_F22_MYSQL_DSN=mysql://user:pass@db/app \
-ESSL_F22_MONGO_URI=mongodb://localhost/app \
-ESSL_F22_REDIS_URL=redis://localhost/0 \
-uv run pytest tests/test_storage_contract.py
-```
-
-The hardware test is opt-in and read-only. It syncs into memory and validates
-counts, a user, and fingerprint metadata without calling block/unblock or
-writing to the device.
-
-```bash
-ESSL_F22_HOST=192.168.1.27 \
-ESSL_F22_PORT=4370 \
-ESSL_F22_COMM_KEY=0 \
-uv run pytest -m hardware
-```
-
-The test is skipped when `ESSL_F22_HOST` is unset.
-
-## License
-
-Apache License 2.0. See `LICENSE`.
+- New to the device? Start with [What this is](getting-started/what-is-this.md).
+- Ready to connect? Go to [First connection](getting-started/first-connection.md).
+- Need the exact API? Go to [Device API](reference/device-api.md).
+- Something failed? Go to [Troubleshooting](help/troubleshooting.md).
