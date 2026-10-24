@@ -1,5 +1,5 @@
 site_name: essl_f22
-site_description: "A short description of the project."
+site_description: "Synchronous Python SDK for eSSL/ZKTeco F22 terminals."
 theme:
   name: material
 nav:
