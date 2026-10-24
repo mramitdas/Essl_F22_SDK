@@ -8,6 +8,16 @@ groups, and access schedules stored on the device. You can also create,
 update, and delete users, change access schedules, and keep a read-only copy of
 the device data in a local or remote database.
 
+Install the SDK:
+
+```bash
+pip install Essl_F22_SDK
+```
+or
+```bash
+uv add Essl_F22_SDK
+```
+
 !!! note "In plain English"
     The terminal is the filing cabinet. The Essl F22 SDK is the set of labelled
     drawers, forms, and procedures your Python program uses to read and update

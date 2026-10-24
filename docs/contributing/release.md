@@ -12,9 +12,10 @@ in [Development](development.md) are already satisfied.
 
 ## Current release status
 
-The `0.1.0` package is prepared and validated locally. It is not yet published
-to PyPI. Publication is tracked separately and requires a one-time PyPI trusted
-publisher plus a matching GitHub environment.
+The `0.1.0` package is published to PyPI. Publication used Trusted Publishing;
+do not reuse version `0.1.0`.
+
+One-time trusted publisher setup is complete for this project.
 
 Do not create the release tag until that setup is complete and verified.
 
