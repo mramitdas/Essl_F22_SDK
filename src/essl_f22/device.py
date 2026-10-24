@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import struct
+from collections.abc import Mapping
 from datetime import datetime
-from typing import Self
+from pathlib import Path
+from typing import Any, Self
 
+from essl_f22.access import BlockManager, BlockResult, UnblockResult
 from essl_f22.errors import CommandError, ProtocolError, UserNotFoundError
+from essl_f22.mirror import Mirror
 from essl_f22.models import (
     AttendanceRecord,
     DeviceInfo,
@@ -40,6 +44,12 @@ from essl_f22.protocol import (
     encode_device_time,
 )
 from essl_f22.session import Session, SessionLike
+from essl_f22.storage import (
+    StorageBackend,
+    SyncMode,
+    SyncResult,
+    create_storage,
+)
 from essl_f22.transport import Transport
 
 
@@ -56,6 +66,10 @@ class Device:
         encoding: str = "utf-8",
         transport: Transport | None = None,
         session: SessionLike | None = None,
+        storage: StorageBackend | None = None,
+        storage_backend: str = "sqlite",
+        storage_path: Path | str | None = None,
+        storage_options: Mapping[str, Any] | None = None,
         max_timezone_slots: int = 50,
         max_groups: int = 100,
     ) -> None:
@@ -68,6 +82,11 @@ class Device:
             else Session(host, port, timeout, comm_key, transport)
         )
         self._serial_number: str | None = None
+        self._storage = storage
+        self._storage_backend = storage_backend
+        self._storage_path = storage_path
+        self._storage_options = storage_options
+        self._owns_storage = storage is None
 
     def connect(self) -> Self:
         self._session.connect()
@@ -75,6 +94,8 @@ class Device:
 
     def close(self) -> None:
         self._session.close()
+        if self._owns_storage and self._storage is not None:
+            self._storage.close()
 
     def __enter__(self) -> Self:
         return self.connect()
@@ -246,6 +267,33 @@ class Device:
 
     def refresh_data(self) -> None:
         self._session.refresh_data()
+
+    def block_user(self, uid: int) -> BlockResult:
+        return BlockManager(self, self._get_storage()).block_user(uid)
+
+    def unblock_user(self, uid: int) -> UnblockResult:
+        return BlockManager(self, self._get_storage()).unblock_user(uid)
+
+    def is_user_blocked(self, uid: int) -> bool:
+        return BlockManager(self, self._get_storage()).is_user_blocked(uid)
+
+    def get_blocked_users(self) -> list[int]:
+        return BlockManager(self, self._get_storage()).get_blocked_users()
+
+    def mirror(self) -> Mirror:
+        return Mirror(self._get_storage(), self.get_serial_number())
+
+    def sync(self, mode: SyncMode = "incremental") -> SyncResult:
+        return self.mirror().sync(self, mode)
+
+    def _get_storage(self) -> StorageBackend:
+        if self._storage is None:
+            self._storage = create_storage(
+                self._storage_backend,
+                path=self._storage_path,
+                options=self._storage_options,
+            )
+        return self._storage
 
     def _require_ack(self, response: Response, action: str) -> None:
         if response.command != CMD_ACK_OK:
