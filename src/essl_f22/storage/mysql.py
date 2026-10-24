@@ -72,9 +72,8 @@ class MysqlStorage(DocumentStorage):
         self._closed = False
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(_SCHEMA)
+                with connection.cursor() as cursor:
+                    cursor.execute(_SCHEMA)
         except self._error as exc:
             raise StateStoreError("cannot initialize MySQL storage") from exc
 
@@ -85,8 +84,14 @@ class MysqlStorage(DocumentStorage):
         connection = self._driver.connect(**self._config)
         try:
             yield connection
+        except BaseException:
+            connection.rollback()
+            raise
+        else:
+            connection.commit()
         finally:
-            connection.close()
+            if connection.open:
+                connection.close()
 
     def read_document(self, namespace: str, key: str) -> Document | None:
         try:
@@ -110,22 +115,19 @@ class MysqlStorage(DocumentStorage):
         payload = document_to_json(dict(document))
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(_UPSERT, (namespace, key, payload))
+                with connection.cursor() as cursor:
+                    cursor.execute(_UPSERT, (namespace, key, payload))
         except self._error as exc:
             raise StateStoreError("cannot write to MySQL storage") from exc
 
     def delete_document(self, namespace: str, key: str) -> None:
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "DELETE FROM documents "
-                            "WHERE namespace = %s AND key_name = %s",
-                            (namespace, key),
-                        )
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM documents WHERE namespace = %s AND key_name = %s",
+                        (namespace, key),
+                    )
         except self._error as exc:
             raise StateStoreError("cannot delete from MySQL storage") from exc
 
@@ -151,13 +153,12 @@ class MysqlStorage(DocumentStorage):
         ]
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "DELETE FROM documents WHERE namespace = %s", (namespace,)
-                        )
-                        if rows:
-                            cursor.executemany(_INSERT, rows)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM documents WHERE namespace = %s", (namespace,)
+                    )
+                    if rows:
+                        cursor.executemany(_INSERT, rows)
         except self._error as exc:
             raise StateStoreError("cannot replace MySQL storage records") from exc
 
@@ -171,15 +172,14 @@ class MysqlStorage(DocumentStorage):
         ]
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "SELECT key_name FROM documents WHERE namespace = %s",
-                            (namespace,),
-                        )
-                        existing = {row[0] for row in cursor.fetchall()}
-                        if rows:
-                            cursor.executemany(_INSERT_IGNORE, rows)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT key_name FROM documents WHERE namespace = %s",
+                        (namespace,),
+                    )
+                    existing = {row[0] for row in cursor.fetchall()}
+                    if rows:
+                        cursor.executemany(_INSERT_IGNORE, rows)
         except self._error as exc:
             raise StateStoreError("cannot upsert MySQL storage records") from exc
         return len(set(unique_documents) - existing)
@@ -187,11 +187,10 @@ class MysqlStorage(DocumentStorage):
     def clear_namespace(self, namespace: str) -> None:
         try:
             with self._connect() as connection:
-                with connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "DELETE FROM documents WHERE namespace = %s", (namespace,)
-                        )
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM documents WHERE namespace = %s", (namespace,)
+                    )
         except self._error as exc:
             raise StateStoreError("cannot clear MySQL storage namespace") from exc
 
