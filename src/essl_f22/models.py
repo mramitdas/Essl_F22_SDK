@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import struct
 from dataclasses import dataclass
+from datetime import datetime
 
 from essl_f22.errors import ProtocolError
 
 USER_RECORD_SIZE = 72
 USER_RECORD_FORMAT = "<HB8s24sIBHHHH24s"
+ATTENDANCE_RECORD_SIZE = 40
+ATTENDANCE_PREFIX = b"\xff255\x00\x00\x00\x00\x00"
+FINGERPRINT_HEADER_SIZE = 6
 
 
 def _decode_fixed(data: bytes, encoding: str) -> str:
@@ -101,3 +105,110 @@ def parse_user_records(blob: bytes, encoding: str = "utf-8") -> list[User]:
         User.from_record(payload[offset : offset + USER_RECORD_SIZE], encoding)
         for offset in range(0, len(payload), USER_RECORD_SIZE)
     ]
+
+
+@dataclass(frozen=True, slots=True)
+class AttendanceRecord:
+    uid: int
+    user_id: str
+    timestamp: datetime
+    status: int
+    punch: int
+
+
+def decode_attendance_timestamp(raw: bytes) -> datetime:
+    value = int.from_bytes(raw, "little")
+    second = value % 60
+    value //= 60
+    minute = value % 60
+    value //= 60
+    hour = value % 24
+    value //= 24
+    day = value % 31 + 1
+    value //= 31
+    month = value % 12 + 1
+    value //= 12
+    year = value + 2000
+    return datetime(year, month, day, hour, minute, second)
+
+
+def parse_attendance_records(blob: bytes, record_count: int) -> list[AttendanceRecord]:
+    if len(blob) < 4:
+        raise ProtocolError("attendance data is missing its size prefix")
+    total_size = int.from_bytes(blob[:4], "little")
+    if record_count == 0 or total_size == 0:
+        return []
+    if total_size % record_count != 0:
+        raise ProtocolError("attendance total size is not divisible by record count")
+    record_size = total_size // record_count
+    if record_size != ATTENDANCE_RECORD_SIZE:
+        raise ProtocolError(
+            f"unsupported attendance record size {record_size}; expected 40"
+        )
+
+    payload = blob[4:]
+    if payload.startswith(ATTENDANCE_PREFIX):
+        payload = payload[len(ATTENDANCE_PREFIX) :]
+    if len(payload) != total_size:
+        raise ProtocolError("attendance data length does not match its size prefix")
+
+    records: list[AttendanceRecord] = []
+    for offset in range(0, total_size, ATTENDANCE_RECORD_SIZE):
+        uid, user_id, status, raw_timestamp, punch, _reserved = struct.unpack_from(
+            "<H24sB4sB8s", payload, offset
+        )
+        records.append(
+            AttendanceRecord(
+                uid=uid,
+                user_id=_decode_fixed(user_id, "utf-8"),
+                timestamp=decode_attendance_timestamp(raw_timestamp),
+                status=status,
+                punch=punch,
+            )
+        )
+    return records
+
+
+@dataclass(frozen=True, slots=True)
+class FingerprintTemplate:
+    uid: int
+    fid: int
+    flag: int
+    template: bytes
+
+    @property
+    def size(self) -> int:
+        return len(self.template) + FINGERPRINT_HEADER_SIZE
+
+
+def parse_fingerprint_templates(blob: bytes) -> list[FingerprintTemplate]:
+    if len(blob) < 4:
+        raise ProtocolError("fingerprint data is missing its size prefix")
+    total_size = int.from_bytes(blob[:4], "little")
+    payload = blob[4:]
+    if total_size == 0:
+        return []
+    if len(payload) != total_size:
+        raise ProtocolError("fingerprint data length does not match its size prefix")
+
+    templates: list[FingerprintTemplate] = []
+    offset = 0
+    while offset < total_size:
+        if total_size - offset < FINGERPRINT_HEADER_SIZE:
+            raise ProtocolError("fingerprint entry is truncated")
+        size, uid, fid, flag = struct.unpack_from("<HHBB", payload, offset)
+        if size < FINGERPRINT_HEADER_SIZE:
+            raise ProtocolError(f"fingerprint entry size {size} is too small")
+        end = offset + size
+        if end > total_size:
+            raise ProtocolError("fingerprint entry is truncated")
+        templates.append(
+            FingerprintTemplate(
+                uid=uid,
+                fid=fid,
+                flag=flag,
+                template=payload[offset + FINGERPRINT_HEADER_SIZE : end],
+            )
+        )
+        offset = end
+    return templates
