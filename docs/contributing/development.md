@@ -173,11 +173,30 @@ Validate strictly:
 uv run mkdocs build --strict
 ```
 
+### Publishing the handbook
+
+GitHub Pages is not available for this private repository on the free plan.
+Cloudflare Pages supports private GitHub repositories on its free plan, with
+unlimited bandwidth and 500 builds per month.
+
+To publish:
+
+1. In the Cloudflare dashboard, open **Workers & Pages** and create a Pages
+   project.
+2. Connect the `mramitdas/essl-f22-sdk` GitHub repository.
+3. Set the production branch to `prod`.
+4. Set the build command to
+   `python -m pip install mkdocs-material && mkdocs build --strict`.
+5. Set the build output directory to `site`.
+6. Set `PYTHON_VERSION` to `3.13` if the build image does not select a supported
+   version automatically.
+
+The generated `site/` directory is ignored by git. Set `site_url` in
+`mkdocs.yml` only after the public hostname is known.
+
 Rules:
 
 - Every behaviour or setup change updates the relevant page.
-- Internal plans under `docs/superpowers/` are excluded from the published
-  site; do not link them from public pages.
 - Use plain language for operator-facing pages, then exact signatures in the
   reference.
 - Do not document unverified device behaviour as fact.
