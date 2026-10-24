@@ -32,7 +32,9 @@ DEVICE = "JJA1242200334"
 OTHER_DEVICE = "OTHER123"
 
 
-@pytest.fixture(params=["memory", "json", "sqlite", "postgres", "mysql"])
+@pytest.fixture(
+    params=["memory", "json", "sqlite", "postgres", "mysql", "mongo", "redis"]
+)
 def storage(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[StorageBackend]:
     if request.param == "memory":
         store: StorageBackend = MemoryStorage()
@@ -45,11 +47,21 @@ def storage(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[StorageB
         if not dsn:
             pytest.skip("ESSL_F22_POSTGRES_DSN is not set")
         store = create_storage("postgres", options={"dsn": dsn})
-    else:
+    elif request.param == "mysql":
         dsn = os.environ.get("ESSL_F22_MYSQL_DSN")
         if not dsn:
             pytest.skip("ESSL_F22_MYSQL_DSN is not set")
         store = create_storage("mysql", options={"dsn": dsn})
+    elif request.param == "mongo":
+        uri = os.environ.get("ESSL_F22_MONGO_URI")
+        if not uri:
+            pytest.skip("ESSL_F22_MONGO_URI is not set")
+        store = create_storage("mongo", options={"uri": uri})
+    else:
+        url = os.environ.get("ESSL_F22_REDIS_URL")
+        if not url:
+            pytest.skip("ESSL_F22_REDIS_URL is not set")
+        store = create_storage("redis", options={"url": url})
     store.clear_device(DEVICE)
     store.clear_device(OTHER_DEVICE)
     yield store

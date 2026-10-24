@@ -12,6 +12,7 @@ from essl_f22.storage.models import (
     SyncResult,
     SyncState,
 )
+from essl_f22.storage.mongo import MongoStorage
 from essl_f22.storage.mysql import MysqlStorage
 from essl_f22.storage.paths import (
     default_data_dir,
@@ -19,6 +20,7 @@ from essl_f22.storage.paths import (
     default_state_path,
 )
 from essl_f22.storage.postgres import PostgresStorage
+from essl_f22.storage.redis import RedisStorage
 from essl_f22.storage.sqlite import SqliteStorage
 
 __all__ = [
@@ -29,8 +31,10 @@ __all__ = [
     "JsonFileStorage",
     "MemoryStorage",
     "MirrorStore",
+    "MongoStorage",
     "MysqlStorage",
     "PostgresStorage",
+    "RedisStorage",
     "SqliteStorage",
     "StorageBackend",
     "SyncMode",
