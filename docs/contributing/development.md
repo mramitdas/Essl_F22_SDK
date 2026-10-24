@@ -183,7 +183,7 @@ To publish:
 
 1. In the Cloudflare dashboard, open **Workers & Pages** and create a Pages
    project.
-2. Connect the `mramitdas/essl-f22-sdk` GitHub repository.
+2. Connect the `mramitdas/Essl_F22_SDK` GitHub repository.
 3. Set the production branch to `prod`.
 4. Set the build command to
    `python -m pip install mkdocs-material && mkdocs build --strict`.
@@ -233,5 +233,5 @@ See [Troubleshooting](../help/troubleshooting.md) for what to collect.
 ## Next
 
 - [Release](release.md)
-- [Contributing source](https://github.com/mramitdas/essl-f22-sdk/blob/dev/CONTRIBUTING.md)
-- [Project rules](https://github.com/mramitdas/essl-f22-sdk/blob/dev/AGENTS.md)
+- [Contributing source](https://github.com/mramitdas/Essl_F22_SDK/blob/dev/CONTRIBUTING.md)
+- [Project rules](https://github.com/mramitdas/Essl_F22_SDK/blob/dev/AGENTS.md)

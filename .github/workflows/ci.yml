@@ -67,4 +67,4 @@ jobs:
         run: |
           uv venv --python 3.14 /tmp/essl_f22-wheel
           uv pip install --python /tmp/essl_f22-wheel/bin/python dist/*.whl
-          /tmp/essl_f22-wheel/bin/python -c "from importlib.metadata import version; import essl_f22; from essl_f22 import Device; assert essl_f22.__version__ == version('essl_f22'); print(Device, essl_f22.__version__)"
+          /tmp/essl_f22-wheel/bin/python -c "from importlib.metadata import version; import essl_f22; from essl_f22 import Device; assert essl_f22.__version__ == version('Essl_F22_SDK'); print(Device, essl_f22.__version__)"

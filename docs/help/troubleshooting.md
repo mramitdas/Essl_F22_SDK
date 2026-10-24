@@ -48,9 +48,9 @@ If the import fails:
 Correct project installation:
 
 ```bash
-python -m pip install essl_f22
+python -m pip install Essl_F22_SDK
 # or
-uv add essl_f22
+uv add Essl_F22_SDK
 ```
 
 If you are before the first public release, install the built wheel explicitly.
@@ -58,16 +58,17 @@ See [Installation](../getting-started/installation.md).
 
 ## The package name looks wrong
 
-`pip` and `uv` may display `essl-f22` because package normalization treats `-`
-and `_` as equivalent. The distribution and import name are `essl_f22`. Check
-with:
+`pip` and `uv` may display `essl-f22-sdk` because package normalization treats
+hyphens, underscores, and periods as equivalent. The distribution name is
+`Essl_F22_SDK`; the import name is `essl_f22`. Check with:
 
 ```bash
-python -m pip show essl_f22
+python -m pip show Essl_F22_SDK
 python -c "import essl_f22; print(essl_f22.__file__)"
 ```
 
-If both commands find the package, the hyphen is only a display convention.
+If both commands find the package, the normalized spelling is only a display
+convention.
 
 ## Cannot connect: timeout
 
@@ -220,7 +221,7 @@ StorageConfigurationError: PostgreSQL storage requires psycopg ...
 StorageConfigurationError: postgres storage requires a non-empty 'dsn' ...
 ```
 
-- Install the matching extra: `essl_f22[postgres]`, `[mysql]`, `[mongo]`, or
+- Install the matching extra: `Essl_F22_SDK[postgres]`, `[mysql]`, `[mongo]`, or
   `[redis]`.
 - Provide `storage_options={"dsn": ...}`, `{"uri": ...}`, or `{"url": ...}`.
 - For MySQL, include a database in the DSN.
@@ -308,7 +309,7 @@ Fix the link or heading; do not remove `--strict` to hide the problem.
 
 Provide:
 
-- `essl_f22` version;
+- `Essl_F22_SDK` version;
 - Python version and OS;
 - device model, platform, firmware, and serial (redact if needed);
 - exact operation and a minimal reproduction;

@@ -23,7 +23,7 @@ class RedisStorage(DocumentStorage):
         except ImportError as exc:
             raise StorageConfigurationError(
                 "Redis storage requires redis from the 'redis' extra: "
-                "install essl_f22[redis]"
+                "install Essl_F22_SDK[redis]"
             ) from exc
         self._error: Any = redis.RedisError
         self._closed = False

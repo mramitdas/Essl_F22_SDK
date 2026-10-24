@@ -64,7 +64,7 @@ class MysqlStorage(DocumentStorage):
         except ImportError as exc:
             raise StorageConfigurationError(
                 "MySQL storage requires pymysql from the 'mysql' extra: "
-                "install essl_f22[mysql]"
+                "install Essl_F22_SDK[mysql]"
             ) from exc
         self._driver: Any = pymysql
         self._error: Any = pymysql.err.MySQLError
